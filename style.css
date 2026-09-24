@@ -913,12 +913,144 @@ a.contact-card:hover { transform: translateY(-4px); border-color: rgba(109, 93, 
 
 .modal__actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 16px; }
 
+/* ---------- Scroll progress ---------- */
+.scroll-progress {
+  position: fixed;
+  top: 0; right: 0;
+  z-index: 150;
+  height: 3px;
+  width: 100%;
+  background: var(--gradient);
+  transform: scaleX(0);
+  transform-origin: right;
+  pointer-events: none;
+}
+
+/* ---------- Project filters ---------- */
+.filters {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+  margin: -24px auto 40px;
+  padding: 6px;
+  width: fit-content;
+  max-width: 100%;
+  border-radius: 999px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+}
+.filters__btn {
+  padding: 9px 20px;
+  border-radius: 999px;
+  color: var(--text-muted);
+  font-weight: 500;
+  font-size: 0.95rem;
+  transition: color 0.25s, background-color 0.25s;
+}
+.filters__btn:hover { color: var(--text); }
+.filters__btn.active { background: var(--gradient); color: #fff; }
+
+.project-card.is-hidden { display: none; }
+.project-card.is-entering { animation: cardIn 0.5s var(--ease) both; }
+@keyframes cardIn { from { opacity: 0; transform: translateY(16px) scale(0.98); } }
+
+.project-card__tech { display: flex; flex-wrap: wrap; gap: 6px; }
+.project-card__tech li {
+  padding: 2px 10px;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--text-dim);
+  font-size: 0.78rem;
+  direction: ltr;
+}
+.project-card__footer { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-top: 8px; }
+.project-card__footer .btn { margin-top: 0; }
+
+/* ---------- CTA band ---------- */
+.cta-band { padding: 0 0 20px; background: var(--bg); position: relative; }
+.cta-band::before { content: ""; position: absolute; inset: 0 0 50% 0; background: var(--bg-alt); }
+.cta-band .container { position: relative; }
+.cta-band__inner {
+  position: relative;
+  overflow: hidden;
+  display: flex; align-items: center; justify-content: space-between; gap: 30px;
+  padding: 48px 52px;
+  border-radius: var(--radius-lg);
+  background: var(--gradient);
+  box-shadow: 0 30px 80px -30px rgba(109, 93, 252, 0.7);
+}
+.cta-band__inner::before,
+.cta-band__inner::after {
+  content: "";
+  position: absolute;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  pointer-events: none;
+}
+.cta-band__inner::before { width: 320px; height: 320px; top: -160px; left: -60px; }
+.cta-band__inner::after { width: 200px; height: 200px; bottom: -120px; left: 180px; }
+.cta-band__inner > * { position: relative; }
+.cta-band h2 { font-size: clamp(1.4rem, 2.8vw, 2rem); line-height: 1.4; margin-bottom: 6px; color: #fff; }
+.cta-band p { color: rgba(255, 255, 255, 0.85); }
+.cta-band__actions { display: flex; flex-wrap: wrap; gap: 12px; flex-shrink: 0; }
+
+.btn--light { background: #fff; color: #2b2170; }
+.btn--light:hover { transform: translateY(-3px); box-shadow: 0 14px 30px -10px rgba(0, 0, 0, 0.4); }
+.btn--outline-light { border: 1px solid rgba(255, 255, 255, 0.6); color: #fff; }
+.btn--outline-light:hover { background: rgba(255, 255, 255, 0.14); transform: translateY(-3px); }
+
+/* ---------- Floating WhatsApp ---------- */
+.wa-float {
+  position: fixed;
+  bottom: 24px; left: 24px;
+  z-index: 90;
+  width: 56px; height: 56px;
+  display: grid; place-items: center;
+  border-radius: 50%;
+  background: #25d366;
+  box-shadow: 0 12px 30px -8px rgba(37, 211, 102, 0.6);
+  transform: translateY(20px) scale(0.8);
+  opacity: 0;
+  visibility: hidden;
+  transition: transform 0.4s var(--ease), opacity 0.4s, visibility 0.4s;
+}
+.wa-float.show { transform: none; opacity: 1; visibility: visible; }
+.wa-float:hover { transform: translateY(-4px) scale(1.05); }
+.wa-float svg { width: 28px; height: 28px; fill: #fff; }
+.wa-float::before {
+  content: "";
+  position: absolute; inset: 0;
+  border-radius: 50%;
+  border: 2px solid #25d366;
+  animation: ring 2.4s ease-out infinite;
+}
+@keyframes ring { from { transform: scale(1); opacity: 0.7; } to { transform: scale(1.6); opacity: 0; } }
+
+/* ---------- Modal navigation ---------- */
+.modal__nav { display: flex; align-items: center; gap: 10px; margin-inline-start: auto; }
+.modal__arrow {
+  width: 44px; height: 44px;
+  display: grid; place-items: center;
+  border-radius: 50%;
+  border: 1px solid var(--border-strong);
+  transition: background 0.3s, border-color 0.3s;
+}
+.modal__arrow:hover { background: rgba(109, 93, 252, 0.15); border-color: var(--primary-2); }
+.modal__arrow svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; }
+.modal__counter { color: var(--text-dim); font-size: 0.9rem; min-width: 38px; text-align: center; direction: ltr; }
+
 /* ---------- Reveal animation ---------- */
 .reveal { opacity: 0; transform: translateY(28px); transition: opacity 0.8s var(--ease), transform 0.8s var(--ease); }
 .reveal.visible { opacity: 1; transform: none; }
 .no-js .reveal { opacity: 1; transform: none; }
 
 /* ---------- Responsive ---------- */
+@media (max-width: 1180px) and (min-width: 961px) {
+  .nav__link { padding: 8px 10px; font-size: 0.95rem; }
+  .header__inner { gap: 16px; }
+}
+
 @media (max-width: 1080px) {
   .services-grid { grid-template-columns: repeat(2, 1fr); }
   .footer__inner { grid-template-columns: 1fr 1fr; }
@@ -965,6 +1097,8 @@ a.contact-card:hover { transform: translateY(-4px); border-color: rgba(109, 93, 
   .about__list li { text-align: right; }
 
   .contact { grid-template-columns: 1fr; }
+
+  .cta-band__inner { flex-direction: column; align-items: flex-start; padding: 40px 32px; }
 }
 
 @media (max-width: 680px) {
@@ -998,6 +1132,16 @@ a.contact-card:hover { transform: translateY(-4px); border-color: rgba(109, 93, 
   .modal__title { font-size: 1.45rem; }
   .modal__cols { grid-template-columns: 1fr; gap: 20px; }
   .modal__actions .btn { flex: 1; }
+  .modal__nav { width: 100%; justify-content: center; margin-inline-start: 0; }
+
+  .filters { margin-top: -12px; border-radius: var(--radius); }
+  .filters__btn { padding: 8px 14px; font-size: 0.9rem; }
+
+  .cta-band__inner { padding: 34px 22px; text-align: center; align-items: center; }
+  .cta-band__actions { width: 100%; }
+  .cta-band__actions .btn { flex: 1; }
+
+  .wa-float { bottom: 16px; left: 16px; width: 52px; height: 52px; }
   .modal__preview { aspect-ratio: 16 / 9; }
   .modal__preview .preview { padding: 14px; }
 }

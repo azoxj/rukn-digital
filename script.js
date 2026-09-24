@@ -12,6 +12,7 @@
   const projects = [
     {
       id: "rukn",
+      category: "landing",
       name: "Rukn Digital",
       type: "صفحة تسويقية",
       preview: "landing",
@@ -29,6 +30,7 @@
     },
     {
       id: "fleetpro",
+      category: "system",
       name: "FleetPro",
       type: "نظام إدارة أسطول",
       preview: "fleet",
@@ -46,6 +48,7 @@
     },
     {
       id: "dashboard",
+      category: "system",
       name: "Business Dashboard",
       type: "نظام ويب",
       preview: "dashboard",
@@ -63,6 +66,7 @@
     },
     {
       id: "corporate",
+      category: "landing",
       name: "Corporate Landing",
       type: "صفحة تسويقية",
       preview: "corporate",
@@ -132,20 +136,46 @@
   grid.innerHTML = projects
     .map(
       (p) => `
-      <article class="project-card reveal">
+      <article class="project-card reveal" data-category="${p.category}">
         <div class="project-card__thumb">${previews[p.preview]()}</div>
         <div class="project-card__body">
           <span class="project-type">${p.type}</span>
           <h3>${p.name}</h3>
           <p>${p.summary}</p>
-          <button class="btn btn--ghost btn--sm" type="button" data-project="${p.id}">
-            عرض المشروع
-            <svg class="btn__icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg>
-          </button>
+          <div class="project-card__footer">
+            <ul class="project-card__tech">${p.tech.slice(0, 3).map((t) => `<li>${t}</li>`).join("")}</ul>
+            <button class="btn btn--ghost btn--sm" type="button" data-project="${p.id}">
+              عرض المشروع
+              <svg class="btn__icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg>
+            </button>
+          </div>
         </div>
       </article>`
     )
     .join("");
+
+  /* ---------- Project filters ---------- */
+  const filterButtons = document.querySelectorAll(".filters__btn");
+  const cards = [...grid.querySelectorAll(".project-card")];
+
+  filterButtons.forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const filter = btn.dataset.filter;
+      filterButtons.forEach((b) => {
+        b.classList.toggle("active", b === btn);
+        b.setAttribute("aria-pressed", String(b === btn));
+      });
+      cards.forEach((card) => {
+        const show = filter === "all" || card.dataset.category === filter;
+        card.classList.toggle("is-hidden", !show);
+        card.classList.remove("is-entering");
+        if (show) {
+          void card.offsetWidth; // restart the entry animation
+          card.classList.add("is-entering");
+        }
+      });
+    });
+  });
 
   /* ---------- Modal ---------- */
   const modal = document.getElementById("projectModal");
@@ -157,12 +187,14 @@
     desc: document.getElementById("modalDesc"),
     features: document.getElementById("modalFeatures"),
     tech: document.getElementById("modalTech"),
+    counter: document.getElementById("modalCounter"),
   };
   let lastFocused = null;
+  let currentIndex = 0;
 
-  const openModal = (id) => {
-    const p = projects.find((item) => item.id === id);
-    if (!p) return;
+  const renderModal = (index) => {
+    const p = projects[index];
+    currentIndex = index;
 
     modalEls.preview.innerHTML = previews[p.preview]();
     modalEls.type.textContent = p.type;
@@ -170,12 +202,23 @@
     modalEls.desc.textContent = p.description;
     modalEls.features.innerHTML = p.features.map((f) => `<li>${f}</li>`).join("");
     modalEls.tech.innerHTML = p.tech.map((t) => `<li>${t}</li>`).join("");
+    modalEls.counter.textContent = `${index + 1} / ${projects.length}`;
+    dialog.scrollTop = 0;
+  };
+
+  const stepModal = (step) => {
+    renderModal((currentIndex + step + projects.length) % projects.length);
+  };
+
+  const openModal = (id) => {
+    const index = projects.findIndex((item) => item.id === id);
+    if (index === -1) return;
+    renderModal(index);
 
     lastFocused = document.activeElement;
     modal.classList.add("open");
     modal.setAttribute("aria-hidden", "false");
     document.body.classList.add("no-scroll");
-    dialog.scrollTop = 0;
     dialog.focus();
   };
 
@@ -194,11 +237,16 @@
 
   modal.addEventListener("click", (e) => {
     if (e.target.closest("[data-close]")) closeModal();
+    const arrow = e.target.closest("[data-step]");
+    if (arrow) stepModal(Number(arrow.dataset.step));
   });
 
   document.addEventListener("keydown", (e) => {
     if (!modal.classList.contains("open")) return;
     if (e.key === "Escape") closeModal();
+    // RTL: the left arrow moves forward, the right arrow moves back
+    if (e.key === "ArrowLeft") stepModal(1);
+    if (e.key === "ArrowRight") stepModal(-1);
 
     // Keep keyboard focus inside the dialog
     if (e.key === "Tab") {
@@ -235,7 +283,16 @@
     if (window.innerWidth > 960 && nav.classList.contains("open")) setMenu(false);
   });
 
-  const onScroll = () => header.classList.toggle("scrolled", window.scrollY > 20);
+  const progress = document.getElementById("scrollProgress");
+  const waFloat = document.querySelector(".wa-float");
+
+  const onScroll = () => {
+    const y = window.scrollY;
+    const max = document.documentElement.scrollHeight - window.innerHeight;
+    header.classList.toggle("scrolled", y > 20);
+    progress.style.transform = `scaleX(${max > 0 ? y / max : 0})`;
+    waFloat.classList.toggle("show", y > window.innerHeight * 0.6);
+  };
   window.addEventListener("scroll", onScroll, { passive: true });
   onScroll();
 
