@@ -6,7 +6,7 @@
 
   document.documentElement.classList.remove("no-js");
 
-  const WHATSAPP_NUMBER = "966500000000";
+  const WHATSAPP_NUMBER = "966507192393";
 
   /* ---------- Projects data ---------- */
   const projects = [
