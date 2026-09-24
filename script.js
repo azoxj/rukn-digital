@@ -31,6 +31,7 @@
     {
       id: "fleetpro",
       category: "system",
+      url: "fleetpro/index.html",
       name: "FleetPro",
       type: "نظام إدارة أسطول",
       preview: "fleet",
@@ -144,10 +145,13 @@
           <p>${p.summary}</p>
           <div class="project-card__footer">
             <ul class="project-card__tech">${p.tech.slice(0, 3).map((t) => `<li>${t}</li>`).join("")}</ul>
-            <button class="btn btn--ghost btn--sm" type="button" data-project="${p.id}">
-              عرض المشروع
-              <svg class="btn__icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg>
-            </button>
+            <div class="project-card__buttons">
+              <button class="btn btn--ghost btn--sm" type="button" data-project="${p.id}">
+                عرض المشروع
+                <svg class="btn__icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg>
+              </button>
+              ${p.url ? `<a class="btn btn--primary btn--sm" href="${p.url}">معاينة المشروع</a>` : ""}
+            </div>
           </div>
         </div>
       </article>`
@@ -188,6 +192,8 @@
     features: document.getElementById("modalFeatures"),
     tech: document.getElementById("modalTech"),
     counter: document.getElementById("modalCounter"),
+    live: document.getElementById("modalLive"),
+    request: document.getElementById("modalRequest"),
   };
   let lastFocused = null;
   let currentIndex = 0;
@@ -203,6 +209,12 @@
     modalEls.features.innerHTML = p.features.map((f) => `<li>${f}</li>`).join("");
     modalEls.tech.innerHTML = p.tech.map((t) => `<li>${t}</li>`).join("");
     modalEls.counter.textContent = `${index + 1} / ${projects.length}`;
+
+    // Projects with a live demo get a preview link; the request button steps back to secondary
+    modalEls.live.hidden = !p.url;
+    if (p.url) modalEls.live.href = p.url;
+    modalEls.request.classList.toggle("btn--primary", !p.url);
+    modalEls.request.classList.toggle("btn--ghost", Boolean(p.url));
     dialog.scrollTop = 0;
   };
 

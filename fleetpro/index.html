@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FleetPro | نظام إدارة الأسطول</title>
+  <meta name="description" content="FleetPro — نظام متكامل لإدارة أسطول المركبات: الصيانة، التأمين، الحوادث، المخالفات، الوقود والسائقين. من تطوير رُكن ديجيتال.">
+  <meta name="theme-color" content="#0b0f1a">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%236d5dfc'/%3E%3Cstop offset='1' stop-color='%2322d3ee'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='32' height='32' rx='8' fill='url(%23g)'/%3E%3Cpath d='M7 11h11v9H7zM18 14h4l3 3v3h-7' fill='none' stroke='white' stroke-width='2.2' stroke-linejoin='round'/%3E%3Ccircle cx='11' cy='21.5' r='2' fill='white'/%3E%3Ccircle cx='21' cy='21.5' r='2' fill='white'/%3E%3C/svg%3E">
+  <script>
+    // Apply the saved theme before first paint to avoid a flash
+    try {
+      var t = localStorage.getItem("fleetpro-theme");
+      if (t === "light" || t === "dark") document.documentElement.setAttribute("data-theme", t);
+    } catch (e) {}
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- ============ Icon sprite ============ -->
+  <svg xmlns="http://www.w3.org/2000/svg" style="display:none">
+    <symbol id="i-home" viewBox="0 0 24 24"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V20h14V9.5"/><path d="M10 20v-6h4v6"/></symbol>
+    <symbol id="i-truck" viewBox="0 0 24 24"><path d="M2 6h12v10H2z"/><path d="M14 9h4l3.5 3.5V16H14"/><circle cx="6" cy="17.5" r="1.8"/><circle cx="17.5" cy="17.5" r="1.8"/></symbol>
+    <symbol id="i-wrench" viewBox="0 0 24 24"><path d="M14.7 6.3a4 4 0 0 0-5.4 5.4L3 18l3 3 6.3-6.3a4 4 0 0 0 5.4-5.4l-2.5 2.5-2.4-.6-.6-2.4 2.5-2.5z"/></symbol>
+    <symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 3 4 6v6c0 4.5 3.4 8.2 8 9 4.6-.8 8-4.5 8-9V6l-8-3z"/><path d="m9 12 2 2 4-4"/></symbol>
+    <symbol id="i-alert" viewBox="0 0 24 24"><path d="M12 3.5 2.5 20h19L12 3.5z"/><path d="M12 10v4.5M12 17.5h.01"/></symbol>
+    <symbol id="i-receipt" viewBox="0 0 24 24"><path d="M6 3h12v18l-3-2-3 2-3-2-3 2V3z"/><path d="M9 8h6M9 12h6"/></symbol>
+    <symbol id="i-fuel" viewBox="0 0 24 24"><path d="M4 20V5a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v15"/><path d="M3 20h12M6 8h6"/><path d="M14 10h2a2 2 0 0 1 2 2v4a1.5 1.5 0 0 0 3 0V8l-3-3"/></symbol>
+    <symbol id="i-users" viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0"/><path d="M16 4.5a3.5 3.5 0 0 1 0 7M21.5 20a6.5 6.5 0 0 0-4-6"/></symbol>
+    <symbol id="i-chart" viewBox="0 0 24 24"><path d="M4 20V11M10 20V4M16 20v-8M21 20H3"/></symbol>
+    <symbol id="i-settings" viewBox="0 0 24 24"><path d="M4 6h9M17 6h3M4 12h3M11 12h9M4 18h11M19 18h1"/><circle cx="15" cy="6" r="2"/><circle cx="9" cy="12" r="2"/><circle cx="17" cy="18" r="2"/></symbol>
+    <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></symbol>
+    <symbol id="i-bell" viewBox="0 0 24 24"><path d="M6 16v-5a6 6 0 0 1 12 0v5l2 2H4l2-2z"/><path d="M10 20.5a2 2 0 0 0 4 0"/></symbol>
+    <symbol id="i-menu" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></symbol>
+    <symbol id="i-x" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></symbol>
+    <symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></symbol>
+    <symbol id="i-moon" viewBox="0 0 24 24"><path d="M20 14.5A8 8 0 0 1 9.5 4 8 8 0 1 0 20 14.5z"/></symbol>
+    <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+    <symbol id="i-eye" viewBox="0 0 24 24"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></symbol>
+    <symbol id="i-download" viewBox="0 0 24 24"><path d="M12 3v12M7 10l5 5 5-5M4 21h16"/></symbol>
+    <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></symbol>
+    <symbol id="i-chevron" viewBox="0 0 24 24"><path d="m15 6-6 6 6 6"/></symbol>
+    <symbol id="i-calendar" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24"><path d="m5 12.5 4.5 4.5L19 7"/></symbol>
+    <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></symbol>
+    <symbol id="i-pin" viewBox="0 0 24 24"><path d="M12 21s-7-6.2-7-11.5a7 7 0 0 1 14 0C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></symbol>
+    <symbol id="i-file" viewBox="0 0 24 24"><path d="M14 3H6v18h12V7l-4-4z"/><path d="M14 3v4h4M9 13h6M9 17h6"/></symbol>
+    <symbol id="i-up" viewBox="0 0 24 24"><path d="m3 17 6-6 4 4 8-8"/><path d="M15 7h6v6"/></symbol>
+    <symbol id="i-down" viewBox="0 0 24 24"><path d="m3 7 6 6 4-4 8 8"/><path d="M15 17h6v-6"/></symbol>
+    <symbol id="i-coin" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M15 9.5c-.5-1-1.6-1.5-3-1.5-1.7 0-3 .8-3 2s1.3 1.7 3 2 3 .8 3 2-1.3 2-3 2c-1.4 0-2.5-.5-3-1.5M12 6v2M12 16v2"/></symbol>
+    <symbol id="i-phone" viewBox="0 0 24 24"><path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2z"/></symbol>
+    <symbol id="i-refresh" viewBox="0 0 24 24"><path d="M20 11a8 8 0 1 0-2.3 5.7"/><path d="M20 4v7h-7"/></symbol>
+    <symbol id="i-star" viewBox="0 0 24 24"><path d="m12 3 2.8 5.7 6.2.9-4.5 4.4 1 6.2L12 17.3 6.5 20.2l1-6.2L3 9.6l6.2-.9z"/></symbol>
+    <symbol id="i-gauge" viewBox="0 0 24 24"><path d="M12 14l4-4"/><path d="M3.5 18a9 9 0 1 1 17 0"/></symbol>
+    <symbol id="i-sort" viewBox="0 0 24 24"><path d="M8 9l4-4 4 4M8 15l4 4 4-4"/></symbol>
+  </svg>
+
+  <div class="app">
+    <!-- ============ Sidebar ============ -->
+    <aside class="sidebar" id="sidebar" aria-label="القائمة الجانبية">
+      <div class="sidebar__head">
+        <a href="#dashboard" class="brand" data-view="dashboard">
+          <span class="brand__mark"><svg class="i"><use href="#i-truck"/></svg></span>
+          <span class="brand__text"><b>FleetPro</b><small>نظام إدارة الأسطول</small></span>
+        </a>
+        <button class="icon-btn sidebar__close" id="sidebarClose" type="button" aria-label="إغلاق القائمة">
+          <svg class="i"><use href="#i-x"/></svg>
+        </button>
+      </div>
+
+      <nav class="side-nav" id="sideNav">
+        <span class="side-nav__label">عام</span>
+        <a href="#dashboard" class="side-nav__link" data-view="dashboard"><svg class="i"><use href="#i-home"/></svg>الرئيسية</a>
+        <a href="#vehicles" class="side-nav__link" data-view="vehicles"><svg class="i"><use href="#i-truck"/></svg>المركبات<span class="side-nav__count" data-count="vehicles"></span></a>
+
+        <span class="side-nav__label">التشغيل</span>
+        <a href="#maintenance" class="side-nav__link" data-view="maintenance"><svg class="i"><use href="#i-wrench"/></svg>الصيانة<span class="side-nav__count is-danger" data-count="maintenance"></span></a>
+        <a href="#insurance" class="side-nav__link" data-view="insurance"><svg class="i"><use href="#i-shield"/></svg>التأمين<span class="side-nav__count is-warning" data-count="insurance"></span></a>
+        <a href="#accidents" class="side-nav__link" data-view="accidents"><svg class="i"><use href="#i-alert"/></svg>الحوادث</a>
+        <a href="#violations" class="side-nav__link" data-view="violations"><svg class="i"><use href="#i-receipt"/></svg>المخالفات<span class="side-nav__count is-warning" data-count="violations"></span></a>
+        <a href="#fuel" class="side-nav__link" data-view="fuel"><svg class="i"><use href="#i-fuel"/></svg>الوقود</a>
+
+        <span class="side-nav__label">الإدارة</span>
+        <a href="#drivers" class="side-nav__link" data-view="drivers"><svg class="i"><use href="#i-users"/></svg>السائقون</a>
+        <a href="#reports" class="side-nav__link" data-view="reports"><svg class="i"><use href="#i-chart"/></svg>التقارير</a>
+        <a href="#settings" class="side-nav__link" data-view="settings"><svg class="i"><use href="#i-settings"/></svg>الإعدادات</a>
+      </nav>
+
+      <div class="sidebar__foot">
+        <a href="../index.html" class="back-link">
+          <svg class="i"><use href="#i-arrow"/></svg>
+          العودة إلى Rukn Digital
+        </a>
+        <p class="sidebar__credit">تطوير <b>رُكن ديجيتال</b> · نسخة تجريبية</p>
+      </div>
+    </aside>
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+    <!-- ============ Main ============ -->
+    <div class="main">
+      <header class="topbar" id="topbar">
+        <button class="icon-btn menu-btn" id="menuBtn" type="button" aria-label="فتح القائمة" aria-controls="sidebar" aria-expanded="false">
+          <svg class="i"><use href="#i-menu"/></svg>
+        </button>
+
+        <div class="topbar__title">
+          <span class="topbar__crumb">FleetPro</span>
+          <h1 id="pageTitle">لوحة التحكم</h1>
+        </div>
+
+        <div class="global-search" id="globalSearch">
+          <svg class="i"><use href="#i-search"/></svg>
+          <input type="search" id="globalSearchInput" placeholder="ابحث برقم المركبة أو اللوحة أو السائق..." autocomplete="off" aria-label="البحث عن مركبة">
+          <kbd>/</kbd>
+          <div class="search-results" id="searchResults" role="listbox"></div>
+        </div>
+
+        <div class="topbar__actions">
+          <button class="icon-btn search-toggle" id="searchToggle" type="button" aria-label="بحث">
+            <svg class="i"><use href="#i-search"/></svg>
+          </button>
+          <button class="icon-btn" id="themeToggle" type="button" aria-label="تبديل المظهر">
+            <svg class="i theme-icon--dark"><use href="#i-sun"/></svg>
+            <svg class="i theme-icon--light"><use href="#i-moon"/></svg>
+          </button>
+          <div class="notif">
+            <button class="icon-btn" id="notifBtn" type="button" aria-label="الإشعارات" aria-expanded="false">
+              <svg class="i"><use href="#i-bell"/></svg>
+              <span class="notif__badge" id="notifBadge"></span>
+            </button>
+            <div class="notif__panel" id="notifPanel">
+              <div class="notif__head">
+                <b>الإشعارات</b>
+                <button type="button" class="link-btn" id="markAllRead">تحديد الكل كمقروء</button>
+              </div>
+              <ul class="notif__list" id="notifList"></ul>
+            </div>
+          </div>
+          <div class="user">
+            <span class="user__avatar">أ.س</span>
+            <span class="user__info"><b>أحمد السالم</b><small>مدير الأسطول</small></span>
+          </div>
+        </div>
+      </header>
+
+      <main class="content" id="content">
+        <!-- Dashboard -->
+        <section class="view" id="view-dashboard" data-title="لوحة التحكم">
+          <div class="view__head">
+            <div>
+              <h2>لوحة التحكم</h2>
+              <p id="welcomeText">نظرة عامة على حالة الأسطول اليوم.</p>
+            </div>
+            <div class="view__actions">
+              <button class="btn btn--ghost" type="button" data-action="export" data-report="fleet"><svg class="i"><use href="#i-download"/></svg>تصدير</button>
+              <button class="btn btn--primary" type="button" data-action="add-vehicle"><svg class="i"><use href="#i-plus"/></svg>إضافة مركبة</button>
+            </div>
+          </div>
+          <div class="stats" id="dashStats"></div>
+          <div class="grid grid--2-1">
+            <div class="card">
+              <div class="card__head"><div><h3>المصروفات الشهرية</h3><p>آخر 6 أشهر (ر.س)</p></div><div class="legend" id="expenseLegend"></div></div>
+              <div class="bar-chart" id="expenseChart"></div>
+            </div>
+            <div class="card">
+              <div class="card__head"><div><h3>حالة الأسطول</h3><p>توزيع المركبات حسب الحالة</p></div></div>
+              <div class="donut-wrap" id="statusDonut"></div>
+            </div>
+          </div>
+          <div class="grid grid--3">
+            <div class="card">
+              <div class="card__head"><div><h3>صيانات قادمة</h3><p>خلال 30 يومًا</p></div><a href="#maintenance" class="link-btn" data-view="maintenance">عرض الكل</a></div>
+              <ul class="list" id="dashUpcoming"></ul>
+            </div>
+            <div class="card">
+              <div class="card__head"><div><h3>تنبيهات التأمين</h3><p>منتهية أو تنتهي قريبًا</p></div><a href="#insurance" class="link-btn" data-view="insurance">عرض الكل</a></div>
+              <ul class="list" id="dashInsurance"></ul>
+            </div>
+            <div class="card">
+              <div class="card__head"><div><h3>المركبات حسب المشروع</h3><p>توزيع الأسطول</p></div></div>
+              <div class="hbars" id="projectBars"></div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card__head"><div><h3>أحدث المركبات</h3><p>آخر المركبات المضافة إلى الأسطول</p></div><a href="#vehicles" class="link-btn" data-view="vehicles">كل المركبات</a></div>
+            <div class="table-wrap"><table class="table table--cards" id="dashVehicles"></table></div>
+          </div>
+        </section>
+
+        <!-- Vehicles -->
+        <section class="view" id="view-vehicles" data-title="المركبات" hidden>
+          <div class="view__head">
+            <div><h2>المركبات</h2><p>إدارة جميع مركبات الأسطول ومتابعة حالتها.</p></div>
+            <div class="view__actions">
+              <button class="btn btn--ghost" type="button" data-action="export" data-report="vehicles"><svg class="i"><use href="#i-download"/></svg>تصدير CSV</button>
+              <button class="btn btn--primary" type="button" data-action="add-vehicle"><svg class="i"><use href="#i-plus"/></svg>إضافة مركبة</button>
+            </div>
+          </div>
+          <div class="tabs" id="vehicleTabs" role="tablist"></div>
+          <div class="card card--flush">
+            <div class="toolbar">
+              <label class="field-search">
+                <svg class="i"><use href="#i-search"/></svg>
+                <input type="search" id="vehicleSearch" placeholder="بحث برقم المركبة، اللوحة، النوع أو السائق" aria-label="بحث في المركبات">
+              </label>
+              <select id="filterProject" class="select" aria-label="المشروع"></select>
+              <select id="filterType" class="select" aria-label="النوع"></select>
+              <button class="btn btn--ghost btn--sm" type="button" id="resetFilters"><svg class="i"><use href="#i-refresh"/></svg>إعادة تعيين</button>
+            </div>
+            <div class="table-wrap"><table class="table table--sortable table--cards" id="vehiclesTable"></table></div>
+            <div class="table-foot" id="vehiclesFoot"></div>
+          </div>
+        </section>
+
+        <!-- Maintenance -->
+        <section class="view" id="view-maintenance" data-title="الصيانة" hidden>
+          <div class="view__head">
+            <div><h2>الصيانة</h2><p>جدولة ومتابعة الصيانة الدورية للمركبات.</p></div>
+            <div class="view__actions">
+              <button class="btn btn--ghost" type="button" data-action="export" data-report="maintenance"><svg class="i"><use href="#i-download"/></svg>تصدير</button>
+              <button class="btn btn--primary" type="button" data-action="schedule"><svg class="i"><use href="#i-calendar"/></svg>جدولة صيانة</button>
+            </div>
+          </div>
+          <div class="stats stats--3" id="maintStats"></div>
+          <div class="grid grid--2">
+            <div class="card">
+              <div class="card__head"><div><h3>الصيانات القادمة</h3><p>مرتبة حسب الأقرب موعدًا</p></div></div>
+              <ul class="list" id="maintUpcoming"></ul>
+            </div>
+            <div class="card card--danger">
+              <div class="card__head"><div><h3>الصيانات المتأخرة</h3><p>تجاوزت موعد الصيانة المحدد</p></div></div>
+              <ul class="list" id="maintOverdue"></ul>
+            </div>
+          </div>
+          <div class="card card--flush">
+            <div class="card__head card__head--pad"><div><h3>آخر عمليات الصيانة</h3><p>سجل الصيانات المنجزة</p></div></div>
+            <div class="table-wrap"><table class="table" id="maintHistory"></table></div>
+          </div>
+        </section>
+
+        <!-- Insurance -->
+        <section class="view" id="view-insurance" data-title="التأمين" hidden>
+          <div class="view__head">
+            <div><h2>التأمين</h2><p>متابعة وثائق تأمين المركبات وتجديدها.</p></div>
+            <div class="view__actions">
+              <button class="btn btn--ghost" type="button" data-action="export" data-report="insurance"><svg class="i"><use href="#i-download"/></svg>تصدير</button>
+            </div>
+          </div>
+          <div class="stats stats--3" id="insStats"></div>
+          <div class="tabs" id="insTabs" role="tablist"></div>
+          <div class="card card--flush">
+            <div class="table-wrap"><table class="table" id="insTable"></table></div>
+          </div>
+        </section>
+
+        <!-- Accidents -->
+        <section class="view" id="view-accidents" data-title="الحوادث" hidden>
+          <div class="view__head">
+            <div><h2>الحوادث</h2><p>سجل الحوادث ومتابعة حالة كل بلاغ.</p></div>
+            <div class="view__actions">
+              <button class="btn btn--ghost" type="button" data-action="export" data-report="accidents"><svg class="i"><use href="#i-download"/></svg>تصدير</button>
+              <button class="btn btn--primary" type="button" data-action="add-accident"><svg class="i"><use href="#i-plus"/></svg>تسجيل حادث</button>
+            </div>
+          </div>
+          <div class="stats stats--3" id="accStats"></div>
+          <div class="card card--flush">
+            <div class="table-wrap"><table class="table" id="accTable"></table></div>
+          </div>
+        </section>
+
+        <!-- Violations -->
+        <section class="view" id="view-violations" data-title="المخالفات" hidden>
+          <div class="view__head">
+            <div><h2>المخالفات</h2><p>المخالفات المرورية المسجلة على مركبات الأسطول.</p></div>
+            <div class="view__actions">
+              <button class="btn btn--ghost" type="button" data-action="export" data-report="violations"><svg class="i"><use href="#i-download"/></svg>تصدير</button>
+            </div>
+          </div>
+          <div class="stats stats--3" id="vioStats"></div>
+          <div class="tabs" id="vioTabs" role="tablist"></div>
+          <div class="card card--flush">
+            <div class="table-wrap"><table class="table" id="vioTable"></table></div>
+          </div>
+        </section>
+
+        <!-- Fuel -->
+        <section class="view" id="view-fuel" data-title="الوقود" hidden>
+          <div class="view__head">
+            <div><h2>الوقود</h2><p>استهلاك الوقود وتكاليف التعبئة.</p></div>
+            <div class="view__actions">
+              <button class="btn btn--ghost" type="button" data-action="export" data-report="fuel"><svg class="i"><use href="#i-download"/></svg>تصدير</button>
+            </div>
+          </div>
+          <div class="stats stats--3" id="fuelStats"></div>
+          <div class="grid grid--2-1">
+            <div class="card">
+              <div class="card__head"><div><h3>استهلاك الوقود الشهري</h3><p>باللتر — آخر 6 أشهر</p></div></div>
+              <div class="line-chart" id="fuelChart"></div>
+            </div>
+            <div class="card">
+              <div class="card__head"><div><h3>الأعلى استهلاكًا</h3><p>هذا الشهر (لتر)</p></div></div>
+              <div class="hbars" id="fuelTop"></div>
+            </div>
+          </div>
+          <div class="card card--flush">
+            <div class="card__head card__head--pad"><div><h3>سجل التعبئة</h3><p>آخر عمليات تعبئة الوقود</p></div></div>
+            <div class="table-wrap"><table class="table" id="fuelTable"></table></div>
+          </div>
+        </section>
+
+        <!-- Drivers -->
+        <section class="view" id="view-drivers" data-title="السائقون" hidden>
+          <div class="view__head">
+            <div><h2>السائقون</h2><p>بيانات السائقين والمركبات المسندة إليهم.</p></div>
+            <div class="view__actions">
+              <label class="field-search field-search--sm">
+                <svg class="i"><use href="#i-search"/></svg>
+                <input type="search" id="driverSearch" placeholder="بحث عن سائق" aria-label="بحث عن سائق">
+              </label>
+            </div>
+          </div>
+          <div class="drivers" id="driversGrid"></div>
+        </section>
+
+        <!-- Reports -->
+        <section class="view" id="view-reports" data-title="التقارير" hidden>
+          <div class="view__head">
+            <div><h2>التقارير</h2><p>تقارير جاهزة للعرض والتصدير.</p></div>
+          </div>
+          <div class="reports" id="reportsGrid"></div>
+          <div class="card">
+            <div class="card__head"><div><h3>تحليل المصروفات</h3><p>توزيع المصروفات حسب البند — آخر 6 أشهر</p></div><div class="legend" id="reportLegend"></div></div>
+            <div class="bar-chart bar-chart--tall" id="reportChart"></div>
+          </div>
+        </section>
+
+        <!-- Settings -->
+        <section class="view" id="view-settings" data-title="الإعدادات" hidden>
+          <div class="view__head">
+            <div><h2>الإعدادات</h2><p>تخصيص بيانات الشركة وتفضيلات النظام.</p></div>
+          </div>
+          <form class="grid grid--2 settings" id="settingsForm" novalidate>
+            <div class="card">
+              <div class="card__head"><div><h3>بيانات الشركة</h3><p>تظهر في التقارير والمراسلات</p></div></div>
+              <div class="form">
+                <label class="form__field"><span>اسم الشركة</span><input class="input" name="company" required></label>
+                <label class="form__field"><span>البريد الإلكتروني</span><input class="input" name="email" type="email" dir="ltr"></label>
+                <label class="form__field"><span>المدينة</span>
+                  <select class="select" name="city">
+                    <option>الرياض</option><option>جدة</option><option>الدمام</option><option>تبوك</option><option>مكة المكرمة</option>
+                  </select>
+                </label>
+                <label class="form__field"><span>فترة الصيانة الدورية (يوم)</span><input class="input" name="interval" type="number" min="30" max="365" step="5"></label>
+              </div>
+            </div>
+            <div class="card">
+              <div class="card__head"><div><h3>التفضيلات</h3><p>المظهر والتنبيهات</p></div></div>
+              <div class="form">
+                <div class="switch-row">
+                  <div><b>الوضع الداكن</b><small>تبديل مظهر النظام</small></div>
+                  <label class="switch"><input type="checkbox" name="dark"><span></span></label>
+                </div>
+                <div class="switch-row">
+                  <div><b>تنبيهات الصيانة</b><small>إشعار قبل موعد الصيانة بـ 7 أيام</small></div>
+                  <label class="switch"><input type="checkbox" name="notifyMaint"><span></span></label>
+                </div>
+                <div class="switch-row">
+                  <div><b>تنبيهات التأمين</b><small>إشعار قبل انتهاء الوثيقة بـ 30 يومًا</small></div>
+                  <label class="switch"><input type="checkbox" name="notifyIns"><span></span></label>
+                </div>
+                <div class="switch-row">
+                  <div><b>ملخص أسبوعي بالبريد</b><small>تقرير مختصر كل يوم أحد</small></div>
+                  <label class="switch"><input type="checkbox" name="weekly"><span></span></label>
+                </div>
+              </div>
+            </div>
+            <div class="settings__actions">
+              <button class="btn btn--ghost" type="button" id="resetSettings"><svg class="i"><use href="#i-refresh"/></svg>استعادة الافتراضي</button>
+              <button class="btn btn--primary" type="submit"><svg class="i"><use href="#i-check"/></svg>حفظ الإعدادات</button>
+            </div>
+          </form>
+        </section>
+      </main>
+    </div>
+  </div>
+
+  <!-- ============ Modal ============ -->
+  <div class="modal" id="modal" aria-hidden="true">
+    <div class="modal__overlay" data-close></div>
+    <div class="modal__dialog" role="dialog" aria-modal="true" aria-labelledby="modalTitle" tabindex="-1">
+      <div class="modal__head">
+        <div id="modalHead"><h3 id="modalTitle"></h3></div>
+        <button class="icon-btn" type="button" data-close aria-label="إغلاق"><svg class="i"><use href="#i-x"/></svg></button>
+      </div>
+      <div class="modal__body" id="modalBody"></div>
+      <div class="modal__foot" id="modalFoot"></div>
+    </div>
+  </div>
+
+  <div class="toasts" id="toasts" aria-live="polite"></div>
+
+  <script src="script.js" defer></script>
+</body>
+</html>

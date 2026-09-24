@@ -411,7 +411,11 @@
           </div>
         </div>
         <div class="modal__actions">
-          <a href="#contact" class="btn btn--primary" data-close>اطلب مشروعًا مشابهًا</a>
+          <a href="#" class="btn btn--primary" id="modalLive" hidden>
+            معاينة المشروع
+            <svg class="btn__icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg>
+          </a>
+          <a href="#contact" class="btn btn--primary" id="modalRequest" data-close>اطلب مشروعًا مشابهًا</a>
           <button class="btn btn--ghost" type="button" data-close>إغلاق</button>
           <div class="modal__nav">
             <button class="modal__arrow" type="button" data-step="-1" aria-label="المشروع السابق">
