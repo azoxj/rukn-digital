@@ -83,6 +83,25 @@
       ],
       tech: ["HTML5", "CSS3", "JavaScript", "SEO"],
     },
+    {
+      id: "clinicflow",
+      category: "system",
+      url: "clinicflow/index.html",
+      name: "ClinicFlow",
+      type: "نظام إدارة عيادات",
+      preview: "clinic",
+      summary: "نظام لإدارة المرضى والمواعيد والأطباء والفواتير في المجمعات الطبية بواجهة عربية سهلة.",
+      description:
+        "نظام ويب تجريبي لإدارة العيادات يجمع ملفات المرضى وجدولة المواعيد وحالة الأطباء والعيادات والفواتير والتقارير في لوحة واحدة، مع بحث عام سريع ومركز إشعارات ووضع ليلي.",
+      features: [
+        "ملفات المرضى مع سجل الزيارات والملاحظات",
+        "حجز المواعيد وتعديلها وإلغاؤها مع منع التعارض",
+        "بطاقات الأطباء وحالة العيادات لحظيًا",
+        "فواتير قابلة للتصدير CSV وتقارير جاهزة",
+        "بحث عام بالاختصار / ووضع ليلي",
+      ],
+      tech: ["HTML5", "CSS3", "JavaScript", "SVG Charts", "LocalStorage"],
+    },
   ];
 
   /* ---------- Preview templates (pure HTML/CSS) ---------- */
@@ -128,6 +147,19 @@
           <span class="pin pin--3" style="right:86%;top:78%"></span>
         </div>
         <div class="preview__list"><span></span><span></span><span></span><span></span></div>
+      </div>`,
+    clinic: () => `
+      <div class="preview preview--clinic" aria-hidden="true">
+        <div class="preview__sidebar">${lines(80, 70, 50, 60, 40)}</div>
+        <div class="preview__content">
+          <div class="preview__kpis"><span></span><span></span><span></span></div>
+          <div class="preview__schedule">
+            <i style="--r:1;--c:2;--s:2"></i><i class="alt" style="--r:1;--c:4;--s:1"></i>
+            <i class="alt" style="--r:2;--c:1;--s:1"></i><i style="--r:2;--c:3;--s:2"></i>
+            <i style="--r:3;--c:2;--s:1"></i><i class="warn" style="--r:3;--c:4;--s:1"></i>
+            <i class="alt" style="--r:4;--c:1;--s:2"></i><i style="--r:4;--c:4;--s:1"></i>
+          </div>
+        </div>
       </div>`,
   };
 

@@ -642,6 +642,35 @@ button { cursor: pointer; background: none; border: none; }
   width: 50%; height: 6px; border-radius: 3px; background: rgba(255, 255, 255, 0.18);
 }
 
+/* ClinicFlow variant (weekly schedule) */
+.preview--clinic { flex-direction: row; background: linear-gradient(135deg, #0c3b39, #0e1c24); }
+.preview--clinic .preview__sidebar { background: rgba(20, 184, 166, 0.12); }
+.preview--clinic .preview__sidebar .mock-line:first-child,
+.preview--clinic .preview__kpis span::after { background: linear-gradient(135deg, #2dd4bf, #0ea5e9); }
+.preview__schedule {
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  grid-template-rows: repeat(4, 1fr);
+  gap: 5px;
+  padding: 6px;
+  border-radius: 10px;
+  background:
+    linear-gradient(90deg, rgba(255, 255, 255, 0.05) 1px, transparent 1px) 0 0 / 25% 100%,
+    rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--border);
+}
+.preview__schedule i {
+  grid-row: var(--r);
+  grid-column: var(--c) / span var(--s);
+  border-radius: 5px;
+  background: rgba(45, 212, 191, 0.55);
+  border-inline-start: 3px solid #2dd4bf;
+}
+.preview__schedule i.alt { background: rgba(14, 165, 233, 0.45); border-color: #38bdf8; }
+.preview__schedule i.warn { background: rgba(245, 158, 11, 0.45); border-color: #fbbf24; }
+
 /* ---------- Process ---------- */
 .process { display: grid; grid-template-columns: repeat(4, 1fr); gap: 22px; counter-reset: step; position: relative; }
 .process::before {
