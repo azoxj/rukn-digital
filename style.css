@@ -571,8 +571,7 @@ button { cursor: pointer; background: none; border: none; }
     rgba(255, 255, 255, 0.04);
 }
 
-/* Dashboard variant */
-.preview--dashboard { flex-direction: row; background: linear-gradient(135deg, #171b33, #0e1222); }
+/* Shared layout for system previews (sidebar + content) */
 .preview__sidebar {
   width: 22%;
   border-radius: 10px;
@@ -593,10 +592,6 @@ button { cursor: pointer; background: none; border: none; }
   content: ""; position: absolute; right: 8px; bottom: 8px;
   width: 45%; height: 7px; border-radius: 4px; background: var(--gradient);
 }
-.preview__chart { flex: 1; min-height: 0; border-radius: 10px; background: rgba(255, 255, 255, 0.04); border: 1px solid var(--border); padding: 6px; }
-.preview__chart svg { width: 100%; height: 100%; }
-.preview__chart path.line { fill: none; stroke: var(--accent); stroke-width: 2.5; stroke-linecap: round; }
-.preview__chart path.area { fill: rgba(34, 211, 238, 0.15); }
 
 /* Fleet variant (map) */
 .preview--fleet { flex-direction: row; background: #0e1628; }
@@ -670,6 +665,43 @@ button { cursor: pointer; background: none; border: none; }
 }
 .preview__schedule i.alt { background: rgba(14, 165, 233, 0.45); border-color: #38bdf8; }
 .preview__schedule i.warn { background: rgba(245, 158, 11, 0.45); border-color: #fbbf24; }
+
+/* Easy HR variant (HR dashboard: check-in + team attendance) */
+.preview--hr { flex-direction: row; background: linear-gradient(135deg, #14245c, #0d1430); }
+.preview--hr .preview__sidebar { background: rgba(91, 130, 245, 0.12); }
+.preview--hr .preview__sidebar .mock-line:first-child,
+.preview--hr .preview__kpis span::after { background: linear-gradient(135deg, #5b82f5, #ff8a3d); }
+.preview__hr { flex: 1; min-height: 0; display: grid; grid-template-columns: 0.9fr 1.4fr; gap: 8px; }
+.preview__checkin {
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--border);
+  display: grid;
+  place-items: center;
+}
+.preview__checkin i {
+  width: 58%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: radial-gradient(circle at 30% 25%, #7395f7, #2451d6);
+  box-shadow: 0 0 0 6px rgba(91, 130, 245, 0.18), 0 0 0 12px rgba(91, 130, 245, 0.08);
+}
+.preview__people { display: grid; gap: 5px; align-content: center; }
+.preview__people span {
+  height: 18px;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 6px;
+}
+.preview__people b { width: 9px; height: 9px; border-radius: 50%; background: rgba(255, 255, 255, 0.35); flex: none; }
+.preview__people span::after { content: ""; order: 1; flex: 1; height: 5px; border-radius: 3px; background: rgba(255, 255, 255, 0.16); }
+.preview__people em { order: 2; width: 22%; height: 8px; border-radius: 4px; background: #34c27a; }
+.preview__people em.late { background: #f0a830; }
+.preview__people em.leave { background: #3aa6ea; }
 
 /* ---------- Process ---------- */
 .process { display: grid; grid-template-columns: repeat(4, 1fr); gap: 22px; counter-reset: step; position: relative; }

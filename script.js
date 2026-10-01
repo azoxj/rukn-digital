@@ -48,22 +48,25 @@
       tech: ["HTML5", "CSS3", "JavaScript", "REST API", "Charts"],
     },
     {
-      id: "dashboard",
+      id: "easyhr",
       category: "system",
-      name: "Business Dashboard",
-      type: "نظام ويب",
-      preview: "dashboard",
-      summary: "لوحة تحكم تحليلية تعرض مؤشرات الأداء والمبيعات بشكل مرئي وواضح.",
+      url: "easyhr/index.html",
+      direct: true,
+      name: "Easy HR",
+      type: "نظام موارد بشرية",
+      preview: "hr",
+      summary:
+        "منصة موارد بشرية متكاملة لإدارة الموظفين والتوظيف والحضور والانصراف والإجازات والرواتب والعقود والأداء والتدريب والطلبات ونهاية الخدمة.",
       description:
-        "لوحة معلومات تفاعلية تساعد الإدارة على اتخاذ القرار من خلال عرض مؤشرات الأداء الرئيسية، والمبيعات، والعملاء في رسوم بيانية سهلة القراءة.",
+        "منصة موارد بشرية متكاملة لإدارة الموظفين والتوظيف والحضور والانصراف والإجازات والرواتب والعقود والأداء والتدريب والطلبات ونهاية الخدمة. نسخة تجريبية بواجهة عربية تعمل بحسابات تجريبية لكل دور (مسؤول، موظف، مدير، موارد بشرية، مالية).",
       features: [
-        "مؤشرات أداء (KPIs) لحظية",
-        "رسوم بيانية تفاعلية",
-        "فلترة البيانات حسب الفترة",
-        "تصدير التقارير",
-        "واجهة داكنة مريحة للعين",
+        "حضور وانصراف بالتحقق من الموقع الجغرافي (Geofence)",
+        "مسارات موافقات قابلة للتخصيص للإجازات والسلف والطلبات",
+        "مسير رواتب بمراحل اعتماد وقسائم رواتب",
+        "صلاحيات حسب الدور ونطاق بيانات لكل مستخدم",
+        "تقارير قابلة للتصدير CSV ووضع ليلي",
       ],
-      tech: ["HTML5", "CSS3", "JavaScript", "SVG Charts"],
+      tech: ["HTML5", "CSS3", "JavaScript"],
     },
     {
       id: "corporate",
@@ -123,16 +126,19 @@
   const previews = {
     landing: () => landingPreview("landing"),
     corporate: () => landingPreview("corporate"),
-    dashboard: () => `
-      <div class="preview preview--dashboard" aria-hidden="true">
+    hr: () => `
+      <div class="preview preview--hr" aria-hidden="true">
         <div class="preview__sidebar">${lines(80, 70, 50, 60, 40)}</div>
         <div class="preview__content">
           <div class="preview__kpis"><span></span><span></span><span></span></div>
-          <div class="preview__chart">
-            <svg viewBox="0 0 200 70" preserveAspectRatio="none">
-              <path class="area" d="M0 55 L25 42 L50 48 L75 30 L100 36 L125 20 L150 26 L175 12 L200 16 L200 70 L0 70 Z"/>
-              <path class="line" d="M0 55 L25 42 L50 48 L75 30 L100 36 L125 20 L150 26 L175 12 L200 16"/>
-            </svg>
+          <div class="preview__hr">
+            <div class="preview__checkin"><i></i></div>
+            <div class="preview__people">
+              <span><b></b><em class="ok"></em></span>
+              <span><b></b><em class="late"></em></span>
+              <span><b></b><em class="ok"></em></span>
+              <span><b></b><em class="leave"></em></span>
+            </div>
           </div>
         </div>
       </div>`,
@@ -178,11 +184,17 @@
           <div class="project-card__footer">
             <ul class="project-card__tech">${p.tech.slice(0, 3).map((t) => `<li>${t}</li>`).join("")}</ul>
             <div class="project-card__buttons">
-              <button class="btn btn--ghost btn--sm" type="button" data-project="${p.id}">
+              ${p.direct
+                ? `<button class="btn btn--ghost btn--sm" type="button" data-project="${p.id}">التفاصيل</button>
+              <a class="btn btn--primary btn--sm" href="${p.url}">
+                عرض المشروع
+                <svg class="btn__icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg>
+              </a>`
+                : `<button class="btn btn--ghost btn--sm" type="button" data-project="${p.id}">
                 عرض المشروع
                 <svg class="btn__icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg>
               </button>
-              ${p.url ? `<a class="btn btn--primary btn--sm" href="${p.url}">معاينة المشروع</a>` : ""}
+              ${p.url ? `<a class="btn btn--primary btn--sm" href="${p.url}">معاينة المشروع</a>` : ""}`}
             </div>
           </div>
         </div>
