@@ -81,6 +81,6 @@ Nothing is pushed, merged or deployed without explicit approval.
 | Product gap analysis | Done | `docs/PRODUCT-GAP-ANALYSIS.md` |
 
 Not done / needs your decision:
-- Hosting for Call Center, Graduation and Requests (they cannot run on GitHub Pages). Until then the site offers «اطلب Demo» for them, shown live on request.
+- Hosting for Call Center, Graduation and Requests for real customers (Node server). Public demos of all three now run in the visitor's browser from `demos/` (same code, sample data), so every system on the site has a self-service demo.
 - AZENK HR, FleetPro and ClinicFlow remain browser demos (labelled as such); server editions are planned in the gap analysis.
 - Nothing pushed, merged or deployed.

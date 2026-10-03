@@ -9,7 +9,7 @@ Three full-stack products built on one shared core:
 | **AZENK Requests** (`apps/requests`) | ADMIN, MANAGER, EMPLOYEE | 4300 |
 
 No third-party runtime dependencies: Node.js built-ins (`node:http`, `node:crypto`,
-`node:sqlite`) only. Requires **Node.js 22.13+**.
+`node:sqlite`) only. Requires **Node.js 22.13+**. (Dev dependencies are used only to build the browser demos.)
 
 ```
 platform/
@@ -57,6 +57,21 @@ npm run requests                           # http://127.0.0.1:4300
 Demo accounts use `example.com` e-mails (e.g. `admin@example.com`, `supervisor@example.com`,
 `agent1@example.com` / `student1@example.com`). Without `DEMO_PASSWORD` a random password is
 generated and printed once.
+
+## Public browser demos (GitHub Pages)
+
+```bash
+npm install          # dev dependencies for the demo build only (esbuild, sql.js, @noble/hashes, buffer)
+npm run build:demo   # writes ../demos/<app>/ — commit the output
+```
+
+Each demo bundles the **same** app definition, routes, validation, RBAC, audit and seed code and runs it
+in the visitor's browser: `node:sqlite` is replaced by sql.js (SQLite in WebAssembly), `node:crypto` by
+Web Crypto + @noble/hashes, and the frontend's `fetch("/api/...")` calls are answered in-page by the
+same request handler (`demo/runtime.js`, shims in `demo/shims/`). Every visitor gets a private,
+freshly seeded database with quick-login buttons for each role; nothing leaves the browser and a page
+reload resets it. Demo-only differences: scrypt cost 2^10 instead of 2^15, uploads kept in memory.
+Real installations still run on the Node server below.
 
 ## Start a real installation
 

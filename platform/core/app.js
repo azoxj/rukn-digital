@@ -32,7 +32,7 @@ export function createPlatformApp(def, { dbFile, dataDir, log = console } = {}) 
     log,
   });
   const cleanup = setInterval(() => auth.cleanup(), 60 * 60 * 1000);
-  cleanup.unref();
+  cleanup.unref?.();
   return { db, handler, router, auth, audit, notify, services, close: () => { clearInterval(cleanup); db.close(); } };
 }
 

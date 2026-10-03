@@ -68,7 +68,7 @@ export class RateLimiter {
     this.windowMs = windowMs;
     this.hits = new Map();
     const t = setInterval(() => this.sweep(), Math.min(windowMs, 60_000));
-    t.unref();
+    t.unref?.();
   }
   /** Record a hit; returns ms until reset when over the limit, else 0. */
   hit(key, now = Date.now()) {

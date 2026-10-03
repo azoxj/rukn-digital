@@ -53,10 +53,9 @@ const ok = (c, m) => { if (c) pass++; else { fail++; console.log("FAIL " + m); }
   ok(statuses.every((s) => ["جاهز", "Demo متاح", "قيد التطوير"].includes(s)), "allowed statuses " + statuses);
   ok(!(await p.textContent("#main")).match(/\d[\d,]*\s*(ريال|SAR|ر\.س)/), "no numeric prices on systems page");
   const live = await p.$$eval("#main .product a.btn[href]:not([data-wa])", (x) => x.map((a) => a.getAttribute("href")));
-  ok(live.length === 4, "4 live demos " + live);
+  ok(live.length === 7, "7 live demos " + live);
   for (const h of live) { const r = await p.request.get(new URL(h, BASE + "products/").href); ok(r.status() === 200, `demo ${h} reachable`); }
   const w = await waTexts();
-  for (const n of ["AZENK Call Center", "AZENK Requests", "AZENK Graduation"]) ok(w.some((t) => t.startsWith(`السلام عليكم، أرغب في طلب Demo لنظام ${n}.`)), `demo request for ${n}`);
   ok(w.some((t) => t === "السلام عليكم، أرغب في عرض سعر لنظام AZENK HR.\n\nالاسم:\nالنشاط:\nعدد المستخدمين:\nملاحظات:"), "structured quote message");
   await p.goto(BASE + "products/#azenk-hr");
   await p.waitForSelector(".pmodal.is-open");

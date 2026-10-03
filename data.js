@@ -8,9 +8,11 @@
    - status: "ready" → جاهز       (usable now)
              "demo"  → Demo متاح   (a real working demo exists)
              "dev"   → قيد التطوير (real code, not released yet)
-   - demo.type: "live"    → the demo opens on this site (demo.url)
-                "request" → server system; the demo is shown in a live
-                            session on request (WhatsApp)
+   - demo.type: "live"    → the demo opens on this site (demo.url).
+                            Server systems run their real code in the
+                            visitor's browser (demos/, built by
+                            platform/scripts/build-demo.js).
+                "request" → demo shown in a live session on request
    - runtime: "browser" → runs in the browser, data stays on the device
               "server"  → Node.js server + database + accounts/roles
    - image: a real screenshot of the system (relative to site root).
@@ -48,7 +50,7 @@ window.AZENK_DATA = {
       id: "azenk-callcenter",
       name: "AZENK Call Center",
       status: "demo",
-      demo: { type: "request" },
+      demo: { type: "live", url: "demos/callcenter/" },
       runtime: "server",
       image: "assets/work/callcenter.webp",
       tagline: { ar: "نظام مركز الاتصال وخدمة العملاء", en: "Call centre & customer service system" },
@@ -73,7 +75,7 @@ window.AZENK_DATA = {
       id: "azenk-requests",
       name: "AZENK Requests",
       status: "demo",
-      demo: { type: "request" },
+      demo: { type: "live", url: "demos/requests/" },
       runtime: "server",
       image: "assets/work/requests.webp",
       tagline: { ar: "الطلبات الداخلية والموافقات", en: "Internal requests & approvals" },
@@ -98,7 +100,7 @@ window.AZENK_DATA = {
       id: "azenk-graduation",
       name: "AZENK Graduation",
       status: "demo",
-      demo: { type: "request" },
+      demo: { type: "live", url: "demos/graduation/" },
       runtime: "server",
       image: "assets/work/graduation.webp",
       tagline: { ar: "نظام إدارة مشاريع التخرج", en: "Graduation project management" },

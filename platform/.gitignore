@@ -3,3 +3,5 @@ data/
 *.db-shm
 *.db-wal
 .env
+node_modules/
+demo/vfs.generated.js

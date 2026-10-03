@@ -81,7 +81,7 @@
     runtimeBrowser: { ar: "يعمل في المتصفح", en: "Runs in the browser" },
     runtimeServer: { ar: "خادم + قاعدة بيانات", en: "Server + database" },
     runtimeBrowserNote: { ar: "نسخة تعمل في المتصفح، والبيانات تُحفظ على جهازك.", en: "Runs in the browser; data is stored on your device." },
-    runtimeServerNote: { ar: "نظام بخادم وقاعدة بيانات وحسابات وصلاحيات. يُعرض الـ Demo في جلسة مباشرة عند الطلب.", en: "A server system with a database, accounts and permissions. The demo is shown in a live session on request." },
+    runtimeServerNote: { ar: "نظام بخادم وقاعدة بيانات وحسابات وصلاحيات. الـ Demo يشغّل نفس كود النظام داخل متصفحك ببيانات تجريبية وأدوار جاهزة، ولا تُحفظ بياناته بعد تحديث الصفحة. التشغيل الفعلي للمنشأة يكون على خادم.", en: "A server system with a database, accounts and permissions. The demo runs the same system code inside your browser with sample data and ready-made roles; nothing is kept after a page reload. Real deployments run on a server." },
     relatedSystems: { ar: "أنظمة ذات صلة", en: "Related systems" },
     requestService: { ar: "اطلب الخدمة", en: "Request service" },
     priceOnRequest: { ar: "السعر عند الطلب", en: "Price on request" },
