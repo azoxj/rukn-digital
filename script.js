@@ -20,6 +20,8 @@
   const LANG_KEY = "azenk:lang";
 
   doc.classList.remove("no-js");
+  // Reveal animations are enabled only by this script, so content stays visible if JS fails
+  doc.classList.add("az-js");
 
   /* =========================================================
      Language

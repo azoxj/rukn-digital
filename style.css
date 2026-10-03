@@ -432,8 +432,8 @@ html[lang="en"] .footer__col h3 { text-transform: uppercase; letter-spacing: 0.1
 .toast.is-show { opacity: 1; transform: translate(-50%, 0); }
 
 /* ---------- Reveal ---------- */
-.reveal { opacity: 0; transform: translateY(18px); transition: opacity 0.8s var(--ease), transform 0.8s var(--ease); transition-delay: calc(var(--d, 0) * 70ms); }
-.reveal.is-in, .no-js .reveal { opacity: 1; transform: none; }
+.az-js .reveal { opacity: 0; transform: translateY(18px); transition: opacity 0.8s var(--ease), transform 0.8s var(--ease); transition-delay: calc(var(--d, 0) * 70ms); }
+.az-js .reveal.is-in { opacity: 1; transform: none; }
 
 /* ---------- Breakpoints (mobile first) ---------- */
 @media (max-width: 559px) {
@@ -504,7 +504,7 @@ html[lang="en"] .footer__col h3 { text-transform: uppercase; letter-spacing: 0.1
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
   *, *::before, *::after { animation: none !important; transition-duration: 0.01ms !important; }
-  .reveal { opacity: 1; transform: none; }
+  .az-js .reveal { opacity: 1; transform: none; }
 }
 @media print {
   .site-header, .wa-float, .mnav, .hero__visual { display: none !important; }
