@@ -8,11 +8,12 @@
    - status: "ready" → جاهز       (usable now)
              "demo"  → Demo متاح   (a real working demo exists)
              "dev"   → قيد التطوير (real code, not released yet)
-   - demo.type: "live"    → a browser demo that opens on this site (demo.url).
-                "request" → «اطلب Demo»: a request in AZENK Demo Center
-                            (CONFIG.DEMO_CENTER_URL), which gives the customer
-                            a private demo account for 24 hours; WhatsApp
-                            demo request while Demo Center is not configured.
+   - demo.type: "live"    → a browser version that opens on this site (demo.url).
+                "request" → no public version; the demo is given as a private
+                            AZENK Demo Center account.
+     Every system also shows «اطلب Demo»: AZENK's regular WhatsApp with a ready
+     message for that system. Staff create the demo account (24 h from the
+     customer's first login) manually in Demo Center admin.
    - demoCenter: the product id in AZENK Demo Center (platform/apps/democenter/products.js).
    - runtime: "browser" → runs in the browser, data stays on the device
               "server"  → Node.js server + database + accounts/roles

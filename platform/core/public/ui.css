@@ -295,3 +295,7 @@ fieldset.fld legend { font-weight: 600; font-size: 13px; color: var(--white); ma
 .demo-login__list { display: grid; gap: 8px; grid-template-columns: repeat(auto-fill, minmax(min(100%, 170px), 1fr)); }
 .demo-login__list .btn { flex-direction: column; align-items: flex-start; gap: 0; height: auto; padding: 8px 12px; white-space: normal; }
 .demo-login__list small { font-weight: 400; font-size: 11.5px; overflow-wrap: anywhere; }
+/* Demo Center: one-time credentials card */
+.sr-copy { position: fixed; top: 0; left: -9999px; width: 1px; height: 1px; opacity: 0; }
+.dl.creds { margin-bottom: 16px; }
+.dl.creds code { display: inline-block; padding: 4px 10px; border: 1px solid var(--gold); border-radius: 8px; background: var(--bg); font-size: 15px; overflow-wrap: anywhere; user-select: all; }

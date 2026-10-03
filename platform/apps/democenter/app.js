@@ -224,7 +224,18 @@ function routes(router, { db, audit, clock, can }, { holder, instances, env }) {
     adminLimit(ctx);
     const r = requestOf(ctx, ctx.params.id);
     if (r.status !== "PENDING") throw conflict("تمت معالجة هذا الطلب مسبقًا");
-    const b = parse(schema({ products: v.array(v.enum(PRODUCT_IDS), { min: 1, max: PRODUCT_IDS.length, optional: true }), note: v.string({ max: 500, optional: true, nullable: true }) }), ctx.body);
+    const b = parse(schema({ products: v.array(v.enum(PRODUCT_IDS), { min: 1, max: PRODUCT_IDS.length, optional: true }), note: v.string({ max: 500, optional: true, nullable: true }),
+      add_to_account: v.int({ min: 1, optional: true }) }), ctx.body);
+    if (b.add_to_account) {
+      // The customer already has an open demo: add the systems to that account instead of a second one.
+      const open = svc.openAccountFor({ org_id: ctx.user.org_id, phone: r.phone, email: r.email });
+      if (!open || open.id !== b.add_to_account) throw conflict("لا يوجد حساب Demo فعّال مطابق لهذا العميل");
+      svc.grant(open, b.products || r.products, ctx.user);
+      const upd = db.prepare("UPDATE demo_requests SET status = 'APPROVED', demo_account_id = ?, decided_by = ?, decided_at = ?, decision_note = ? WHERE id = ? AND status = 'PENDING'").run(open.id, ctx.user.id, svc.nowIso(), b.note ?? null, r.id);
+      if (!upd.changes) throw conflict("تمت معالجة هذا الطلب للتو");
+      audit.log(ctx, "demo_request.approved", "demo_request", r.id, { demo_account_id: open.id, added_to_existing: true });
+      return { account: accountRow(svc.get(open.id)) };
+    }
     const { account, password } = await svc.createAccount({ org_id: ctx.user.org_id, customer_name: r.customer_name, phone: r.phone, email: r.email, company_name: r.company_name, products: b.products || r.products, request_id: r.id }, ctx.user);
     const upd = db.prepare("UPDATE demo_requests SET status = 'APPROVED', demo_account_id = ?, decided_by = ?, decided_at = ?, decision_note = ? WHERE id = ? AND status = 'PENDING'").run(account.id, ctx.user.id, svc.nowIso(), b.note ?? null, r.id);
     if (!upd.changes) throw conflict("تمت معالجة هذا الطلب للتو");
@@ -270,8 +281,8 @@ function routes(router, { db, audit, clock, can }, { holder, instances, env }) {
   });
 
   const createSchema = schema({
-    customer_name: v.string({ min: 2, max: 120 }), phone: v.phone({ optional: true, nullable: true }), email: v.email({ optional: true, nullable: true }),
-    company_name: v.string({ max: 160, optional: true, nullable: true }), products: v.array(v.enum(PRODUCT_IDS), { min: 1, max: PRODUCT_IDS.length }),
+    customer_name: v.string({ min: 2, max: 120 }), phone: v.phone(), email: v.email({ optional: true, nullable: true }),
+    company_name: v.string({ min: 2, max: 160 }), products: v.array(v.enum(PRODUCT_IDS), { min: 1, max: PRODUCT_IDS.length }),
   });
   router.post("/api/admin/demos", { perm: "demos.manage" }, async (ctx) => {
     adminLimit(ctx);

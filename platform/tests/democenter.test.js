@@ -11,6 +11,11 @@ const { fakeClock, HOUR } = await import("../core/clock.js");
 const { hashPassword } = await import("../core/security.js");
 
 let center, server, base, clock, dataDir, staffOrg;
+// Everything the server writes to its logger or the console, and every password it ever issued:
+// the final test proves no password reached logs, console, audit, URLs or redirects.
+const logged = [], issued = [], urls = [];
+const origConsole = {};
+for (const k of ["log", "info", "warn", "error", "debug"]) { origConsole[k] = console[k]; console[k] = (...a) => { logged.push(a.map(String).join(" ")); if (k === "error") origConsole[k](...a); }; }
 
 /** Cookie-jar client (multiple cookies, demo + staff + product). */
 function client() {
@@ -23,7 +28,9 @@ function client() {
       if (csrf && method !== "GET") h["x-csrf-token"] = csrf;
       let payload;
       if (body !== undefined && !raw) { h["content-type"] = "application/json"; payload = JSON.stringify(body); } else if (raw) payload = body;
+      urls.push(path);
       const res = await fetch(base + path, { method, headers: h, body: payload, redirect });
+      if (res.headers.get("location")) urls.push(res.headers.get("location"));
       for (const sc of res.headers.getSetCookie()) {
         const [pair] = sc.split(";");
         const i = pair.indexOf("=");
@@ -33,6 +40,7 @@ function client() {
       const ct = res.headers.get("content-type") || "";
       const data = ct.includes("json") ? await res.json() : await res.text();
       if (data && data.csrf) csrf = data.csrf;
+      if (data && data.credentials && data.credentials.password) issued.push(data.credentials.password);
       return { status: res.status, data, headers: res.headers };
     },
     get: (p, o) => c.req("GET", p, undefined, o),
@@ -48,11 +56,14 @@ const demoLogin = async (username, password) => { const c = client(); const r = 
 const reqBody = (over = {}) => ({ customer_name: "عميل اختبار", phone: "0551234567", email: "client@example.com", company_name: "شركة اختبار", products: ["hr", "call-center"], users_count: "6-20", notes: "تجربة", ...over });
 
 let superC, adminC, acc = {};
+let phoneSeq = 0;
+/** Admin-created demo account body (phone + company are required; each test customer has its own phone). */
+const demoBody = (over = {}) => ({ customer_name: "عميل", company_name: "منشأة اختبار", phone: `0560${String(100000 + ++phoneSeq)}`, products: ["requests"], ...over });
 
 before(async () => {
   clock = fakeClock(Date.UTC(2026, 9, 3, 7, 0, 0)); // 10:00 Riyadh
   dataDir = mkdtempSync(join(tmpdir(), "azk-demo-"));
-  center = createDemoCenter({ dbFile: ":memory:", dataDir, clock, sweepMs: 0, log: { error() {}, warn() {} }, env: { ...process.env, AZENK_WHATSAPP: "" } });
+  center = createDemoCenter({ dbFile: ":memory:", dataDir, clock, sweepMs: 0, log: { error: (...a) => logged.push(a.map(String).join(" ")), warn: (...a) => logged.push(a.map(String).join(" ")), info: (...a) => logged.push(a.map(String).join(" ")) }, env: { ...process.env, AZENK_WHATSAPP: "" } });
   server = await listen(center.handler, 0);
   base = `http://127.0.0.1:${server.address().port}`;
   const db = center.app.db;
@@ -63,7 +74,7 @@ before(async () => {
   superC = await staff("super@azenk.test");
   adminC = await staff("admin@azenk.test");
 });
-after(async () => { await new Promise((r) => server.close(r)); center.close(); rmSync(dataDir, { recursive: true, force: true }); });
+after(async () => { await new Promise((r) => server.close(r)); center.close(); rmSync(dataDir, { recursive: true, force: true }); Object.assign(console, origConsole); });
 
 test("public catalog lists all 7 products with configurable URLs", async () => {
   const r = await client().get("/api/demo/catalog");
@@ -180,7 +191,7 @@ test("server product: isolated instance, role SSO, product API behind the gate",
 });
 
 test("cross-account isolation: another demo account gets its own data", async () => {
-  const r = await superC.post("/api/admin/demos", { customer_name: "عميل ب", products: ["call-center", "requests"] });
+  const r = await superC.post("/api/admin/demos", demoBody({ customer_name: "عميل ب", products: ["call-center", "requests"] }));
   assert.equal(r.status, 201);
   acc.b = { id: r.data.account.id, username: r.data.credentials.username, password: r.data.credentials.password };
   const { c } = await demoLogin(acc.b.username, acc.b.password);
@@ -244,7 +255,7 @@ test("extend: admin +24h from now when expired; SUPER_ADMIN custom period", asyn
   assert.equal(login.status, 200);
   acc.c = (await demoLogin(acc.username, acc.password)).c;
   // extending a never-used account is refused (its clock has not started)
-  const fresh = await adminC.post("/api/admin/demos", { customer_name: "لم يدخل", products: ["fleet"] });
+  const fresh = await adminC.post("/api/admin/demos", demoBody({ customer_name: "لم يدخل", products: ["fleet"] }));
   assert.equal((await adminC.post(`/api/admin/demos/${fresh.data.account.id}/extend`, {})).status, 409);
 });
 
@@ -340,11 +351,156 @@ test("dashboard stats and audit trail; audit log is append-only", async () => {
 });
 
 test("periodic sweep marks overdue accounts EXPIRED and closes instances", async () => {
-  const r = await adminC.post("/api/admin/demos", { customer_name: "مسح", products: ["requests"] });
+  const r = await adminC.post("/api/admin/demos", demoBody({ customer_name: "مسح", products: ["requests"] }));
   const { c } = await demoLogin(r.data.credentials.username, r.data.credentials.password);
   await c.get("/demo-target/requests/");
   assert.ok(center.instances.size() > 0);
   clock.advance(25 * HOUR);
   center.sweep();
   assert.equal(center.app.db.prepare("SELECT status FROM demo_accounts WHERE id = ?").get(r.data.account.id).status, "EXPIRED");
+});
+
+/* ============ Manual WhatsApp workflow: staff create accounts in the admin panel ============ */
+const freshLimits = () => { for (const l of Object.values(center.limits)) l.clear(); };
+
+test("admin creates a demo account: required fields, random username, strong one-time password, hashed at rest", async () => {
+  freshLimits();
+  const missing = await adminC.post("/api/admin/demos", { customer_name: "ناقص", products: ["hr"] });
+  assert.equal(missing.status, 422);
+  assert.ok(missing.data.error.fields.phone && missing.data.error.fields.company_name, "phone + company required");
+  const noEmail = await adminC.post("/api/admin/demos", demoBody({ customer_name: "بدون بريد", email: "" , products: ["hr", "fleet", "requests"] }));
+  assert.equal(noEmail.status, 201, "e-mail is optional");
+  const two = await adminC.post("/api/admin/demos", demoBody({ customer_name: "عميل آخر" }));
+  const [a, b] = [noEmail.data, two.data];
+  assert.match(a.credentials.username, /^demo-[a-z2-9]{6,}$/);
+  assert.notEqual(a.credentials.username, b.credentials.username);
+  assert.notEqual(a.credentials.password, b.credentials.password);
+  for (const pw of [a.credentials.password, b.credentials.password]) assert.ok(pw.length >= 14 && /[a-z]/.test(pw) && /[A-Z]/.test(pw) && /\d/.test(pw), "strong random password");
+  // What the admin sees after creation
+  assert.equal(a.account.customer_name, "بدون بريد");
+  assert.deepEqual(a.account.products, ["hr", "fleet", "requests"], "several systems on one account");
+  assert.equal(a.account.status, "PENDING");
+  assert.equal(a.account.activated_at, null, "no first login yet");
+  assert.equal(a.account.expires_at, null, "24h not started at creation");
+  // Stored hashed only; detail API never returns it again
+  const row = center.app.db.prepare("SELECT * FROM demo_accounts WHERE id = ?").get(a.account.id);
+  assert.match(row.password_hash, /^scrypt\$/);
+  assert.ok(!JSON.stringify(row).includes(a.credentials.password), "no plaintext in the database");
+  const detail = await adminC.get(`/api/admin/demos/${a.account.id}`);
+  assert.ok(!JSON.stringify(detail.data).includes(a.credentials.password) && !("password_hash" in detail.data.account));
+  acc.manual = { id: a.account.id, username: a.credentials.username, password: a.credentials.password, phone: row.phone };
+});
+
+test("24h starts at the customer's first login (not at creation) and ends with EXPIRED everywhere", async () => {
+  freshLimits();
+  const { id, username, password } = acc.manual;
+  clock.advance(9 * HOUR); // the customer logs in hours after the account was created
+  const firstAt = clock.now();
+  const { c, r } = await demoLogin(username, password);
+  assert.equal(r.status, 200);
+  assert.equal(Date.parse(r.data.account.activated_at), firstAt);
+  assert.equal(Date.parse(r.data.account.expires_at), firstAt + 24 * HOUR);
+  for (const p of ["hr", "fleet", "requests"]) assert.equal((await c.get(`/api/demo/access/${p}`)).status, 200, p);
+  assert.equal((await c.get("/api/demo/access/call-center")).status, 403, "not granted");
+  const admin = (await adminC.get(`/api/admin/demos/${id}`)).data.account;
+  assert.equal(admin.status, "ACTIVE");
+  assert.equal(Date.parse(admin.activated_at), firstAt, "admin sees the first-login time");
+  clock.advance(24 * HOUR);
+  const st = await c.get("/api/demo/status");
+  assert.equal(st.status, 403);
+  assert.equal(st.data.error.code, "EXPIRED");
+  for (const p of ["hr", "fleet", "requests"]) assert.equal((await c.get(`/api/demo/access/${p}`)).status, 403);
+  const page = await c.get("/demo-target/requests/");
+  assert.equal(page.status, 302);
+  assert.match(page.headers.get("location"), /#\/expired$/);
+  assert.equal((await c.get("/demo-target/requests/api/requests")).status, 403);
+  const again = await demoLogin(username, password);
+  assert.equal(again.r.status, 403);
+  assert.equal(again.r.data.error.code, "EXPIRED");
+  assert.equal((await adminC.get(`/api/admin/demos/${id}`)).data.account.status, "EXPIRED");
+});
+
+test("one open account per customer: no second account; staff add systems to the existing one", async () => {
+  freshLimits();
+  const first = await adminC.post("/api/admin/demos", demoBody({ customer_name: "نورة", phone: "0557778899", email: "noura@example.com", products: ["hr"] }));
+  assert.equal(first.status, 201);
+  const id = first.data.account.id, { username, password } = first.data.credentials;
+  const { c } = await demoLogin(username, password);
+  const exp = (await c.get("/api/demo/status")).data.expires_at;
+  // Same customer again (phone written differently) → refused with the existing account
+  for (const body of [{ phone: "+966557778899" }, { phone: "966 55 777 8899" }, { phone: "0500000001", email: "NOURA@example.com" }]) {
+    const dup = await adminC.post("/api/admin/demos", demoBody({ customer_name: "نورة", products: ["call-center"], ...body }));
+    assert.equal(dup.status, 409, JSON.stringify(body));
+    assert.equal(dup.data.error.code, "DEMO_EXISTS");
+    assert.equal(dup.data.error.details.account.id, id);
+    assert.deepEqual(dup.data.error.details.account.products, ["hr"]);
+    assert.ok(!JSON.stringify(dup.data).includes(password));
+  }
+  assert.equal(center.app.db.prepare("SELECT COUNT(*) n FROM demo_accounts WHERE phone LIKE '%557778899'").get().n, 1);
+  // Add a system to the existing account: same login, same expiry, new product open
+  assert.equal((await adminC.post(`/api/admin/demos/${id}/products`, { grant: ["call-center"] })).status, 200);
+  assert.deepEqual((await c.get("/api/demo/products")).data.products.map((p) => p.id).sort(), ["call-center", "hr"]);
+  assert.equal((await c.get("/api/demo/access/call-center")).status, 200);
+  assert.equal((await c.get("/api/demo/status")).data.expires_at, exp, "adding a system does not restart the 24h");
+  // A web request from the same customer: approve into the existing account
+  const rq = await client().post("/api/demo/requests", reqBody({ customer_name: "نورة", phone: "0557778899", email: "noura@example.com", products: ["graduation"] }));
+  const ap = await adminC.post(`/api/admin/demo-requests/${rq.data.id}/approve`, {});
+  assert.equal(ap.status, 409);
+  assert.equal(ap.data.error.code, "DEMO_EXISTS");
+  const add = await adminC.post(`/api/admin/demo-requests/${rq.data.id}/approve`, { add_to_account: id });
+  assert.equal(add.status, 200);
+  assert.equal(add.data.credentials, undefined, "no new credentials");
+  assert.ok(add.data.account.products.includes("graduation"));
+  assert.equal(center.app.db.prepare("SELECT demo_account_id, status FROM demo_requests WHERE id = ?").get(rq.data.id).demo_account_id, id);
+  assert.equal((await adminC.post(`/api/admin/demo-requests/${rq.data.id}/approve`, { add_to_account: id })).status, 409, "processed once");
+  // Suspended still counts as open; once expired a new trial may be created
+  await adminC.post(`/api/admin/demos/${id}/suspend`, {});
+  assert.equal((await adminC.post("/api/admin/demos", demoBody({ phone: "0557778899" }))).status, 409);
+  await adminC.post(`/api/admin/demos/${id}/activate`, {});
+  clock.advance(25 * HOUR);
+  const fresh = await adminC.post("/api/admin/demos", demoBody({ customer_name: "نورة", phone: "0557778899", products: ["hr"] }));
+  assert.equal(fresh.status, 201, "after expiry a new account is allowed");
+  acc.noura = { id, c, newId: fresh.data.account.id };
+});
+
+test("isolation and admin permissions for the manual workflow", async () => {
+  freshLimits();
+  const a = await adminC.post("/api/admin/demos", demoBody({ customer_name: "العميل أ", products: ["requests"] }));
+  const b = await adminC.post("/api/admin/demos", demoBody({ customer_name: "العميل ب", products: ["requests"] }));
+  const ca = (await demoLogin(a.data.credentials.username, a.data.credentials.password)).c;
+  const cb = (await demoLogin(b.data.credentials.username, b.data.credentials.password)).c;
+  assert.equal((await ca.get("/api/demo/me")).data.account.id, a.data.account.id);
+  assert.equal((await cb.get("/api/demo/me")).data.account.id, b.data.account.id);
+  // A's password does not open B; customers cannot reach staff APIs or create accounts
+  assert.equal((await demoLogin(b.data.credentials.username, a.data.credentials.password)).r.status, 401);
+  for (const [m, path, body] of [["get", "/api/admin/demos"], ["get", `/api/admin/demos/${b.data.account.id}`], ["post", "/api/admin/demos", demoBody()], ["post", `/api/admin/demos/${b.data.account.id}/products`, { grant: ["hr"] }]]) {
+    const r = await ca[m](path, body);
+    assert.equal(r.status, 401, `${m} ${path}`);
+  }
+  assert.equal((await client().post("/api/admin/demos", demoBody())).status, 401, "anonymous");
+  // Server products: each account has its own instance (role SSO), no shared data
+  for (const c of [ca, cb]) { await c.get("/demo-target/requests/"); assert.equal((await c.post("/demo-target/requests/api/demo-sso", { role: "EMPLOYEE" })).status, 200); }
+  const mine = await ca.get("/demo-target/requests/api/auth/me");
+  const theirs = await cb.get("/demo-target/requests/api/auth/me");
+  assert.equal(mine.status, 200); assert.equal(theirs.status, 200);
+  assert.notEqual(center.instances.size(), 0);
+  // ADMIN cannot use custom extensions (SUPER_ADMIN only); both may create accounts
+  const s = await superC.post("/api/admin/demos", demoBody({ customer_name: "مدير عام ينشئ" }));
+  assert.equal(s.status, 201);
+  assert.equal((await adminC.post(`/api/admin/demos/${a.data.account.id}/extend`, { hours: 72 })).status, 403);
+  assert.equal((await superC.post(`/api/admin/demos/${a.data.account.id}/extend`, { hours: 72 })).status, 200);
+});
+
+test("passwords never appear in audit log, server logs, console, URLs or redirects", async () => {
+  freshLimits();
+  // Also exercise a password reset so its password is checked too
+  const r = await adminC.post(`/api/admin/demos/${acc.noura.newId}/reset-password`, {});
+  assert.equal(r.status, 200);
+  assert.ok(issued.length >= 8, "collected issued passwords");
+  const audit = center.app.db.prepare("SELECT action, meta FROM audit_log").all();
+  assert.ok(audit.length > 20);
+  const haystacks = [JSON.stringify(audit), logged.join("\n"), urls.join("\n")];
+  for (const pw of issued) for (const h of haystacks) assert.ok(!h.includes(pw), "password leaked");
+  assert.ok(!/password["']?\s*[:=]/i.test(JSON.stringify(audit.map((a) => a.meta))), "no password field in audit meta");
+  assert.ok(!urls.some((u) => /[?&](username|password|user|pass)=/i.test(u)), "no credentials in query strings");
 });

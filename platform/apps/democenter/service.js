@@ -73,8 +73,32 @@ export function createDemoService({ db, clock, audit }) {
   }
 
   /** Create an account (status PENDING; the clock starts at first login). Returns the one-time password. */
+  /** Comparable phone: last 9 digits (05XXXXXXXX, 9665XXXXXXXX and +9665XXXXXXXX match). */
+  const phoneKey = (p) => String(p || "").replace(/\D/g, "").slice(-9);
+  /**
+   * The customer's demo account that is still usable (not started, active or suspended),
+   * matched by phone or e-mail. One customer never gets a second account while one is open.
+   */
+  function openAccountFor({ org_id, phone, email }) {
+    const pk = phoneKey(phone), em = String(email || "").trim().toLowerCase();
+    if (!pk && !em) return null;
+    const rows = db.prepare("SELECT * FROM demo_accounts WHERE org_id = ? AND status IN ('PENDING','ACTIVE','SUSPENDED') ORDER BY id DESC").all(org_id);
+    for (const r of rows) {
+      const a = refresh(r);
+      if (a.status === "EXPIRED") continue;
+      if ((pk.length >= 7 && phoneKey(a.phone) === pk) || (em && String(a.email || "").toLowerCase() === em)) return a;
+    }
+    return null;
+  }
+
   async function createAccount({ org_id, customer_name, phone, email, company_name, products: prods, request_id = null }, byUser) {
     const ids = validateProducts(prods);
+    const existing = openAccountFor({ org_id, phone, email });
+    if (existing) {
+      throw demoError(409, "DEMO_EXISTS", "لدى هذا العميل حساب Demo فعّال. أضف الأنظمة الجديدة إلى حسابه الحالي بدل إنشاء حساب ثانٍ.", {
+        account: { id: existing.id, username: existing.username, customer_name: existing.customer_name, company_name: existing.company_name, phone: existing.phone, status: existing.status, products: products(existing.id) },
+      });
+    }
     const password = generatePassword();
     const hash = await hashPassword(password);
     const id = tx(db, () => {
@@ -207,7 +231,7 @@ export function createDemoService({ db, clock, audit }) {
     return due.map((a) => a.id);
   }
 
-  return { audit, now, nowIso, get, refresh, publicAccount, products, remainingMs, createAccount, grant, revoke, login, authenticate, requireProduct, logout, suspend, activate, extend, expireNow, resetPassword, sweep, validateProducts };
+  return { audit, now, nowIso, get, refresh, openAccountFor, publicAccount, products, remainingMs, createAccount, grant, revoke, login, authenticate, requireProduct, logout, suspend, activate, extend, expireNow, resetPassword, sweep, validateProducts };
 }
 
 export const notFoundAccount = () => notFound("الحساب التجريبي");

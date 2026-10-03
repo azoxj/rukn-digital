@@ -12,10 +12,11 @@
      Leave it empty until the official account link is confirmed;
      the icon then shows as "coming soon" instead of a dead link.
    - DEMO_CENTER_URL: base URL of AZENK Demo Center (a server app in
-     platform/apps/democenter), e.g. "https://demo.azenk.sa". While it
-     is empty, «اطلب Demo» falls back to a WhatsApp demo request and the
-     «تسجيل الدخول إلى Demo Center» link is hidden. No credentials ever
-     go in this file or in a URL.
+     platform/apps/democenter), e.g. "https://demo.azenk.sa". Used only for
+     the «تسجيل الدخول إلى Demo Center» link (hidden while empty).
+     «اطلب Demo» always opens regular WhatsApp with a ready message; staff
+     then create the demo account by hand. No credentials ever go in this
+     file or in a URL.
    ========================================================= */
 window.AZENK_CONFIG = {
   BRAND: "AZENK",

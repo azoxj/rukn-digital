@@ -7,7 +7,7 @@
   const { esc, fmt, $ } = AZ;
   const L = {
     role: { SUPER_ADMIN: "مدير عام", ADMIN: "مدير" },
-    acc: { PENDING: "لم يبدأ", ACTIVE: "نشط", EXPIRED: "منتهٍ", SUSPENDED: "موقوف" },
+    acc: { PENDING: "مفعّل — بانتظار أول دخول", ACTIVE: "نشط", EXPIRED: "منتهٍ", SUSPENDED: "موقوف" },
     accTone: { PENDING: "info", ACTIVE: "ok", EXPIRED: "", SUSPENDED: "err" },
     req: { PENDING: "جديد", APPROVED: "تمت الموافقة", REJECTED: "مرفوض", COMPLETED: "مكتمل (دخل العميل)", CANCELLED: "ملغى" },
     reqTone: { PENDING: "warn", APPROVED: "info", REJECTED: "err", COMPLETED: "ok", CANCELLED: "" },
@@ -27,16 +27,60 @@
   const productChecks = (all, selected = []) => `<div class="check-grid">${all.map((p) => `<label class="chk"><input type="checkbox" name="p_${p.id}"${selected.includes(p.id) ? " checked" : ""}> ${esc(p.name)}</label>`).join("")}</div>`;
   const readChecks = (v, all) => all.filter((p) => v["p_" + p.id]).map((p) => p.id);
 
-  /** Show the one-time credentials with a copy-ready message (never put them in a URL). */
-  const showCredentials = (title, c) => {
-    const msg = ["بيانات الدخول إلى AZENK Demo Center", `الرابط: ${location.origin}/`, `اسم المستخدم: ${c.username}`, `كلمة المرور: ${c.password}`, "مدة التجربة 24 ساعة تبدأ من أول تسجيل دخول."].join("\n");
+  /** Copy text: Clipboard API when available (HTTPS/localhost), otherwise a temporary selection. */
+  const copyText = async (text) => {
+    try { if (navigator.clipboard && window.isSecureContext) { await navigator.clipboard.writeText(text); return true; } } catch (e) { /* fall back */ }
+    const ta = document.createElement("textarea");
+    ta.value = text; ta.setAttribute("readonly", ""); ta.className = "sr-copy";
+    document.body.appendChild(ta); ta.select();
+    let ok = false; try { ok = document.execCommand("copy"); } catch (e) { ok = false; }
+    ta.remove();
+    return ok;
+  };
+
+  /**
+   * Show the account with its one-time credentials and a «نسخ بيانات الدخول» button, so staff can
+   * send them to the customer manually on WhatsApp. The password exists only in this dialog: it is
+   * stored hashed, never logged, never put in a URL and cannot be shown again.
+   */
+  const showCredentials = (title, account, c) => {
+    const names = (account.products || []).map(pname).join("، ") || "—";
+    const first = account.activated_at ? fmt.dateTime(account.activated_at) : "لم يدخل بعد";
+    const until = account.expires_at ? fmt.dateTime(account.expires_at) : "بعد 24 ساعة من أول دخول";
+    const msg = ["السلام عليكم،", "بيانات دخولك إلى AZENK Demo Center:", "", `الرابط: ${location.origin}/`, `الأنظمة: ${names}`, `اسم المستخدم: ${c.username}`, `كلمة المرور: ${c.password}`, "", "مدة التجربة 24 ساعة تبدأ من أول تسجيل دخول."].join("\n");
     AZ.modal({
-      title, cancel: "تم",
-      body: `<p>سلّم هذه البيانات للعميل. <b>لن تظهر كلمة المرور مرة أخرى</b> ولا تُحفظ إلا مشفّرة.</p>
-        <div class="secret"><code dir="ltr">${esc(c.username)}</code></div><div class="secret"><code dir="ltr">${esc(c.password)}</code></div>
-        <button type="button" class="btn btn--primary btn--sm" data-copy>نسخ رسالة جاهزة للإرسال</button>
-        <p class="hint">انسخ الرسالة والصقها في محادثة العميل. لا ترسل كلمة المرور داخل رابط.</p>`,
-      onOpen: (f) => $("[data-copy]", f).addEventListener("click", () => navigator.clipboard && navigator.clipboard.writeText(msg).then(() => AZ.toast("تم نسخ الرسالة"))),
+      title, cancel: "تم", wide: true,
+      body: `<p>سلّم هذه البيانات للعميل يدويًا عبر WhatsApp. <b>لن تظهر كلمة المرور مرة أخرى</b>، وتُحفظ مشفّرة فقط.</p>
+        <dl class="dl creds">
+          <dt>اسم العميل</dt><dd data-c="customer">${esc(account.customer_name)}</dd>
+          <dt>النظام/الأنظمة</dt><dd data-c="products">${esc(names)}</dd>
+          <dt>Username</dt><dd><code dir="ltr" data-c="username">${esc(c.username)}</code></dd>
+          <dt>Password</dt><dd><code dir="ltr" data-c="password">${esc(c.password)}</code></dd>
+          <dt>وقت أول دخول</dt><dd data-c="first">${esc(first)}</dd>
+          <dt>انتهاء الـ24 ساعة</dt><dd data-c="until">${esc(until)}</dd>
+          <dt>الحالة</dt><dd data-c="status">${AZ.badge(L.acc[account.status], L.accTone[account.status])}</dd>
+        </dl>
+        <button type="button" class="btn btn--primary" data-copy>نسخ بيانات الدخول</button>
+        <p class="hint">الصق الرسالة في محادثة العميل على WhatsApp. لا ترسل كلمة المرور داخل رابط.</p>`,
+      onOpen: (f) => $("[data-copy]", f).addEventListener("click", async () => AZ.toast((await copyText(msg)) ? "تم نسخ بيانات الدخول" : "تعذّر النسخ — انسخ البيانات يدويًا")),
+    });
+  };
+
+  /** The customer already has an open demo: offer to add the selected systems to it. */
+  const offerExisting = (err, selected, addFn) => {
+    const ex = err.details.account;
+    const extra = selected.filter((p) => !ex.products.includes(p));
+    AZ.modal({
+      title: "لدى العميل حساب Demo فعّال", submit: extra.length ? "إضافة الأنظمة إلى الحساب الحالي" : "فتح الحساب", wide: true,
+      body: `<p>${esc(err.message)}</p>
+        <dl class="dl"><dt>العميل</dt><dd>${esc(ex.customer_name)}</dd><dt>الجوال</dt><dd dir="ltr">${esc(ex.phone || "—")}</dd><dt>Username</dt><dd><code dir="ltr">${esc(ex.username)}</code></dd>
+        <dt>الحالة</dt><dd>${AZ.badge(L.acc[ex.status], L.accTone[ex.status])}</dd><dt>أنظمته الحالية</dt><dd>${esc(ex.products.map(pname).join("، ") || "—")}</dd>
+        <dt>ستُضاف</dt><dd data-extra>${esc(extra.map(pname).join("، ") || "لا جديد — كل الأنظمة المختارة مفعّلة لديه")}</dd></dl>
+        <p class="hint">لا يُنشأ حساب ثانٍ ولا تتغير كلمة المرور أو مدة التجربة.</p>`,
+      onSubmit: async () => {
+        if (extra.length) { await addFn(ex.id, extra); AZ.toast("تمت إضافة الأنظمة إلى الحساب الحالي"); }
+        AZ.go(`#/demos/${ex.id}`); AZ.reload();
+      },
     });
   };
 
@@ -102,9 +146,13 @@
         onSubmit: async (v) => {
           const sel = readChecks(v, all);
           if (!sel.length) throw new AZ.ApiError(422, "اختر نظامًا واحدًا على الأقل");
-          const r = await AZ.post(`/api/admin/demo-requests/${x.id}/approve`, { products: sel, note: v.note });
+          let r;
+          try { r = await AZ.post(`/api/admin/demo-requests/${x.id}/approve`, { products: sel, note: v.note }); } catch (err) {
+            if (err.code !== "DEMO_EXISTS") throw err;
+            return setTimeout(() => offerExisting(err, sel, (id) => AZ.post(`/api/admin/demo-requests/${x.id}/approve`, { products: sel, note: v.note, add_to_account: id })));
+          }
           AZ.reload();
-          showCredentials("تم إنشاء الحساب التجريبي", r.credentials);
+          showCredentials("تم إنشاء الحساب التجريبي", r.account, r.credentials);
         },
       });
     });
@@ -136,12 +184,18 @@
       const all = await products();
       AZ.modal({
         title: "حساب تجريبي جديد", submit: "إنشاء", wide: true,
-        body: `<div class="grid2">${AZ.field({ name: "customer_name", label: "اسم العميل", required: true })}${AZ.field({ name: "company_name", label: "المنشأة" })}${AZ.field({ name: "phone", label: "الجوال", type: "tel", dir: "ltr" })}${AZ.field({ name: "email", label: "البريد", type: "email", dir: "ltr" })}</div>
+        body: `<div class="grid2">${AZ.field({ name: "customer_name", label: "اسم العميل", required: true })}${AZ.field({ name: "company_name", label: "اسم المنشأة", required: true })}${AZ.field({ name: "phone", label: "الجوال", type: "tel", dir: "ltr", required: true, placeholder: "05XXXXXXXX" })}${AZ.field({ name: "email", label: "البريد (اختياري)", type: "email", dir: "ltr" })}</div>
+          <p class="hint">يُنشأ اسم مستخدم عشوائي وكلمة مرور قوية تلقائيًا. الحساب جاهز فورًا، ومدة الـ24 ساعة تبدأ عند أول دخول للعميل.</p>
           <h3>الأنظمة</h3><div class="fld" data-field="products">${productChecks(all)}<small class="err" hidden></small></div>`,
         onSubmit: async (v) => {
-          const r = await AZ.post("/api/admin/demos", { customer_name: v.customer_name, company_name: v.company_name, phone: v.phone, email: v.email, products: readChecks(v, all) });
+          const sel = readChecks(v, all);
+          let r;
+          try { r = await AZ.post("/api/admin/demos", { customer_name: v.customer_name, company_name: v.company_name, phone: v.phone, email: v.email, products: sel }); } catch (err) {
+            if (err.code !== "DEMO_EXISTS") throw err;
+            return setTimeout(() => offerExisting(err, sel, (id, extra) => AZ.post(`/api/admin/demos/${id}/products`, { grant: extra })));
+          }
           AZ.go(`#/demos/${r.account.id}`);
-          showCredentials("تم إنشاء الحساب التجريبي", r.credentials);
+          showCredentials("تم إنشاء الحساب التجريبي", r.account, r.credentials);
         },
       });
     });
@@ -188,7 +242,7 @@
         }
         if (confirmText[act] && !(await AZ.confirm(confirmText[act][0], confirmText[act][1], { submit: "تأكيد" }))) return;
         const r = await AZ.post(`/api/admin/demos/${a.id}/${act}`, {});
-        if (act === "reset-password") { AZ.reload(); return showCredentials("كلمة المرور الجديدة", r.credentials); }
+        if (act === "reset-password") { AZ.reload(); return showCredentials("كلمة المرور الجديدة", r.account, r.credentials); }
         AZ.toast("تم"); AZ.reload();
       } catch (err) { AZ.fail(err); }
     });

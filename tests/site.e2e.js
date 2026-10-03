@@ -58,10 +58,14 @@ const ok = (c, m) => { if (c) pass++; else { fail++; console.log("FAIL " + m); }
   ok(!live.some((h) => h.includes("demos/")), "no public shared-login demos linked");
   ok((await p.request.get(BASE + "demos/callcenter/")).status() === 404, "public demos/ not published");
   const reqDemo = await p.$$eval("#main .product a[data-wa^='demo:']", (x) => x.map((a) => a.textContent.trim()));
-  ok(reqDemo.length === 3 && reqDemo.every((t) => t.includes("اطلب Demo")), "server systems: «اطلب Demo» via WhatsApp while Demo Center is not configured " + reqDemo);
+  ok(reqDemo.length === 7 && reqDemo.every((t) => t.includes("اطلب Demo")), "every system: «اطلب Demo» opens WhatsApp " + reqDemo.length);
+  ok(!(await p.$("#main a[data-demo-request]")) && !(await p.$("#main a[href*='/#/request']")), "no Demo Center request form links (WhatsApp only)");
   ok(!(await p.$("a[href*='/#/login']")), "no Demo Center login link while DEMO_CENTER_URL is empty");
   const w = await waTexts();
-  ok(w.includes("السلام عليكم، أرغب في طلب Demo لنظام AZENK Call Center.\n\nالاسم:\nالنشاط:\nعدد المستخدمين:\nالوقت المناسب للعرض:"), "structured demo request message");
+  ok(w.includes("السلام عليكم،\nأرغب في تجربة نظام AZENK HR.\n\nالاسم:\nاسم المنشأة:\nعدد المستخدمين:\nملاحظات:"), "demo request message for AZENK HR (spec text)");
+  ok(w.includes("السلام عليكم،\nأرغب في تجربة نظام AZENK Call Center.\n\nالاسم:\nاسم المنشأة:\nعدد المستخدمين:\nملاحظات:"), "demo request message per system");
+  const demoHrefs = await p.$$eval("#main .product a[data-wa^='demo:']", (x) => x.map((a) => a.href));
+  ok(demoHrefs.every((h) => h.startsWith("https://wa.me/966507192393?text=")), "«اطلب Demo» → regular wa.me on the configured number");
   ok(w.some((t) => t === "السلام عليكم، أرغب في عرض سعر لنظام AZENK HR.\n\nالاسم:\nالنشاط:\nعدد المستخدمين:\nملاحظات:"), "structured quote message");
   await p.goto(BASE + "products/#azenk-hr");
   await p.waitForSelector(".pmodal.is-open");
@@ -78,13 +82,12 @@ const ok = (c, m) => { if (c) pass++; else { fail++; console.log("FAIL " + m); }
     const q = await dc.newPage();
     await q.goto(BASE + "products/");
     await q.waitForSelector("#main .product");
-    const links = await q.$$eval("#main .product a[data-demo-request]", (x) => x.map((a) => a.getAttribute("href")));
-    ok(JSON.stringify(links) === JSON.stringify(["https://demo.azenk.sa/#/request?product=call-center", "https://demo.azenk.sa/#/request?product=requests", "https://demo.azenk.sa/#/request?product=graduation"]), "«اطلب Demo» → Demo Center request with product " + links);
-    ok(links.every((h) => !/user|pass/i.test(h)), "no credentials in Demo Center URLs");
+    const reqs = await q.$$eval("#main .product a[data-wa^='demo:']", (x) => x.map((a) => a.href));
+    ok(reqs.length === 7 && reqs.every((h) => h.startsWith("https://wa.me/966507192393?text=")), "with Demo Center configured, «اطلب Demo» still opens WhatsApp");
+    ok(!(await q.$("a[href*='user'], a[href*='pass']")), "no credentials in any link");
     ok(await q.$("footer a[href='https://demo.azenk.sa/#/login']"), "footer: Sign in to Demo Center");
     ok((await q.textContent("footer")).includes("تسجيل الدخول إلى Demo Center"), "Demo Center login label");
-    ok((await q.$$("a[href^='https://wa.me/']")).length > 0, "WhatsApp kept alongside Demo Center");
-    await dc.close();
+        await dc.close();
   }
 
   /* ---------- home paths ---------- */

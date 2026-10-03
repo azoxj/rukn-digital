@@ -133,9 +133,9 @@
   const WA_NUMBER = waReady ? RAW_NUMBER : "";
   const waHref = (text) => (waReady ? `https://wa.me/${WA_NUMBER}${text ? `?text=${encodeURIComponent(text)}` : ""}` : null);
 
-  // AZENK Demo Center (CFG.DEMO_CENTER_URL). Empty → not deployed yet: demo requests go to WhatsApp.
+  // AZENK Demo Center (CFG.DEMO_CENTER_URL): only the «تسجيل الدخول إلى Demo Center» link; hidden while empty.
+  // Demo requests always go to AZENK's regular WhatsApp with a ready message (no WhatsApp API or bot).
   const DEMO_CENTER = /^(https:\/\/|http:\/\/(localhost|127\.0\.0\.1)(:\d+)?)[^\s?#]*$/.test(String(CFG.DEMO_CENTER_URL || "")) ? String(CFG.DEMO_CENTER_URL).replace(/\/+$/, "") : "";
-  const demoRequestHref = (p) => `${DEMO_CENTER}/#/request?product=${encodeURIComponent(p.demoCenter || "")}`;
   const demoCenterLink = (cls) => (DEMO_CENTER ? `<a class="${cls}" href="${esc(DEMO_CENTER)}/#/login" rel="noopener">${ui("demoCenterLogin")}</a>` : "");
   const phoneDisplay = () => {
     if (!waReady) return "—";
@@ -173,8 +173,8 @@
       const p = findProduct(id);
       if (!p) return waMessages.general();
       return lang === "ar"
-        ? form([`السلام عليكم، أرغب في طلب Demo لنظام ${p.name}.`, "", "الاسم:", "النشاط:", "عدد المستخدمين:", "الوقت المناسب للعرض:"])
-        : form([`Hello, I would like to request a demo of ${p.name}.`, "", "Name:", "Business:", "Number of users:", "Preferred time for the demo:"]);
+        ? form(["السلام عليكم،", `أرغب في تجربة نظام ${p.name}.`, "", "الاسم:", "اسم المنشأة:", "عدد المستخدمين:", "ملاحظات:"])
+        : form(["Hello,", `I would like to try ${p.name}.`, "", "Name:", "Company name:", "Number of users:", "Notes:"]);
     },
     quote: (id) => {
       const p = findProduct(id);
@@ -390,13 +390,11 @@
       ${mark("ph")}<b dir="ltr">${esc(p.name)}</b><small>${ui("previewSoon")}</small></div>`;
   const productVisual = (p) => (p.image ? `<img src="${ROOT}${esc(p.image)}" alt="${esc(p.name)} — ${esc(t(p.tagline))}" loading="lazy" width="800" height="500">` : productPlaceholder(p));
   const priceHTML = () => `<span class="price price--ask">${ui("priceOnRequest")}</span>`;
-  // Demo button: a live browser demo, a Demo Center request (WhatsApp until Demo Center is configured), or nothing.
+  // Demo buttons: the live browser version (if any) + «اطلب Demo» on WhatsApp with a ready message for this system.
   const demoBtn = (p, cls = "btn--sm") => {
     const d = p.demo || {};
-    if (d.type === "live" && d.url) return `<a class="btn btn--ghost ${cls}" href="${ROOT}${esc(d.url)}">${icon("external")}${ui(p.status === "ready" ? "tryNow" : "tryDemo")}</a>`;
-    if (d.type === "request" && DEMO_CENTER && p.demoCenter) return `<a class="btn btn--ghost ${cls}" data-demo-request="${esc(p.demoCenter)}" href="${esc(demoRequestHref(p))}" rel="noopener">${icon("external")}${ui("requestDemo")}</a>`;
-    if (d.type === "request") return `<a class="btn btn--ghost ${cls}" data-wa="demo:${p.id}" href="#">${icon("whatsapp")}${ui("requestDemo")}</a>`;
-    return "";
+    const live = d.type === "live" && d.url ? `<a class="btn btn--ghost ${cls}" href="${ROOT}${esc(d.url)}">${icon("external")}${ui(p.status === "ready" ? "tryNow" : "tryDemo")}</a>` : "";
+    return `${live}<a class="btn btn--ghost ${cls}" data-wa="demo:${p.id}" href="#">${icon("whatsapp")}${ui("requestDemo")}</a>`;
   };
   const quoteBtn = (p, cls = "btn--sm") => `<a class="btn btn--gold ${cls}" data-wa="quote:${p.id}" href="#">${icon("whatsapp")}${ui("requestQuote")}</a>`;
 

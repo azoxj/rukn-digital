@@ -199,7 +199,7 @@ export function createHandler({ router, auth, staticDirs = [], trustProxy = fals
           res.end("404 — الصفحة غير موجودة");
           return;
         }
-        sendJson(res, err.status, { error: { message: err.message, fields: err.fields || undefined } }, headers);
+        sendJson(res, err.status, { error: { message: err.message, fields: err.fields || undefined, code: err.code || undefined, details: err.details || undefined } }, headers);
         return;
       }
       if (err && /UNIQUE constraint failed/.test(err.message)) {

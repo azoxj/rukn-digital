@@ -20,7 +20,7 @@ const ok = (c, m) => { console.log((c ? "PASS " : "FAIL ") + m); if (!c) fails++
 
 const clock = fakeClock(Date.UTC(2026, 9, 3, 7, 0, 0));
 const dataDir = mkdtempSync(join(tmpdir(), "azk-dc-e2e-"));
-const center = createDemoCenter({ dbFile: ":memory:", dataDir, clock, sweepMs: 0, env: { ...process.env, AZENK_WHATSAPP: "" }, log: { error: (...a) => console.error(...a), warn() {} } });
+const center = createDemoCenter({ dbFile: ":memory:", dataDir, clock, sweepMs: 0, env: { ...process.env }, log: { error: (...a) => console.error(...a), warn() {} } });
 seedDemo(center.app.db, await hashPassword("Staff-pass-2026"));
 const server = await listen(center.handler, 0);
 const B = `http://127.0.0.1:${server.address().port}`;
@@ -30,42 +30,66 @@ const errs = [];
 const page = async (ctx) => { const p = await ctx.newPage(); p.on("pageerror", (e) => errs.push(e.message)); p.on("console", (m) => { if (m.type() === "error" && !/status of 4\d\d|ERR_FAILED/.test(m.text())) errs.push(m.text()); }); return p; };
 const customer = await browser.newContext({ viewport: { width: 1280, height: 860 } });
 await customer.route(/fonts\.(googleapis|gstatic)\.com/, (r) => r.abort());
-const staff = await browser.newContext({ viewport: { width: 1280, height: 860 } });
+await customer.route(/wa\.me/, (r) => r.fulfill({ status: 200, contentType: "text/plain", body: "wa" }));
+const staff = await browser.newContext({ viewport: { width: 1280, height: 860 }, permissions: ["clipboard-read", "clipboard-write"] });
 const c = await page(customer), s = await page(staff);
 
 try {
-  // 1. Customer requests a demo
+  // 1. Customer asks for a demo on regular WhatsApp (ready message, no API/bot)
   await c.goto(`${B}/#/request?product=hr,call-center`);
-  await c.waitForSelector("form input[name=customer_name]");
-  ok(await c.isChecked("input[value=hr]") && await c.isChecked("input[value=call-center]"), "product preselected from the website link");
-  await c.click("button[type=submit]");
-  await c.waitForSelector(".fld.is-err");
-  ok(true, "request form validation");
-  await c.fill("input[name=customer_name]", "سارة اختبار");
-  await c.fill("input[name=phone]", "0551112233");
-  await c.fill("input[name=email]", "sara@example.com");
-  await c.fill("input[name=company_name]", "مؤسسة الاختبار");
-  await c.selectOption("select[name=users_count]", "6-20");
-  await c.click("button[type=submit]");
-  await c.waitForSelector("text=تم استلام طلبك");
-  ok(true, "customer submitted a demo request");
+  await c.waitForSelector("input[value=hr]");
+  ok(await c.isChecked("input[value=hr]") && await c.isChecked("input[value=call-center]"), "product preselected from the link");
+  const [wa] = await Promise.all([c.waitForEvent("popup"), c.click("button[type=submit]")]);
+  const waUrl = wa.url(); await wa.close();
+  ok(waUrl.startsWith("https://wa.me/966507192393?text="), "opens wa.me on the configured number " + waUrl.slice(0, 40));
+  ok(decodeURIComponent(waUrl.split("text=")[1]) === "السلام عليكم،\nأرغب في تجربة الأنظمة: AZENK HR، AZENK Call Center.\n\nالاسم:\nاسم المنشأة:\nعدد المستخدمين:\nملاحظات:", "ready WhatsApp message");
 
-  // 2. Admin sees and approves
+  // 2. Admin creates the account manually from the WhatsApp details
   await s.goto(`${B}/admin/`);
   await s.fill("input[name=email]", "admin@example.com");
   await s.fill("input[name=password]", "Staff-pass-2026");
   await s.click("button[type=submit]");
   await s.waitForSelector(".side");
   ok(await s.isVisible("text=طلبات جديدة"), "admin dashboard");
-  await s.goto(`${B}/admin/#/requests?status=PENDING`);
-  await s.waitForSelector("td:has-text('سارة اختبار')");
-  ok(true, "admin sees the request");
-  await s.click("tr:has-text('سارة اختبار') [data-review]");
+  await s.goto(`${B}/admin/#/demos`);
+  await s.click("[data-new]");
+  await s.fill(".modal input[name=customer_name]", "سارة اختبار");
   await s.click(".modal button[type=submit]");
-  await s.waitForSelector(".secret code");
-  const [username, password] = await s.$$eval(".secret code", (x) => x.map((e) => e.textContent));
-  ok(/^demo-/.test(username) && password.length >= 10, "account created; credentials shown once");
+  await s.waitForSelector(".modal .is-err, .modal .form-err:not([hidden])");
+  ok(true, "create form validation (phone + company required)");
+  await s.fill(".modal input[name=company_name]", "مؤسسة الاختبار");
+  await s.fill(".modal input[name=phone]", "0551112233");
+  await s.check(".modal input[name=p_hr]"); await s.check(".modal input[name=p_call-center]");
+  await s.click(".modal button[type=submit]");
+  await s.waitForSelector("[data-c=password]");
+  const username = await s.textContent("[data-c=username]"), password = await s.textContent("[data-c=password]");
+  ok(/^demo-/.test(username) && password.length >= 14, "random username + strong password shown once");
+  ok((await s.textContent("[data-c=customer]")) === "سارة اختبار" && (await s.textContent("[data-c=products]")) === "AZENK HR، AZENK Call Center", "name + systems shown");
+  ok((await s.textContent("[data-c=first]")) === "لم يدخل بعد" && (await s.textContent("[data-c=until]")).includes("24 ساعة من أول دخول"), "first login / 24h end shown (not started)");
+  ok((await s.textContent("[data-c=status]")).includes("بانتظار أول دخول"), "status shown");
+  await s.screenshot({ path: join(dataDir, "creds.png") });
+  await s.click("button:has-text('نسخ بيانات الدخول')");
+  await s.waitForSelector("text=تم نسخ بيانات الدخول");
+  const clip = await s.evaluate(() => navigator.clipboard.readText());
+  ok(clip.includes(`اسم المستخدم: ${username}`) && clip.includes(`كلمة المرور: ${password}`) && clip.includes("AZENK HR، AZENK Call Center"), "«نسخ بيانات الدخول» copies a ready message");
+  ok(!/[?&](user|pass)/i.test(clip), "no credentials in a URL");
   await s.click(".modal [data-close] >> nth=1");
+  ok(!(await s.content()).includes(password), "password gone after closing the dialog");
+
+  // Same customer again → no second account; add a system to the existing one
+  await s.goto(`${B}/admin/#/demos`);
+  await s.click("[data-new]");
+  await s.fill(".modal input[name=customer_name]", "سارة اختبار");
+  await s.fill(".modal input[name=company_name]", "مؤسسة الاختبار");
+  await s.fill(".modal input[name=phone]", "+966551112233");
+  await s.check(".modal input[name=p_graduation]");
+  await s.click(".modal button[type=submit]");
+  await s.waitForSelector("text=لدى العميل حساب Demo فعّال");
+  ok((await s.textContent("[data-extra]")).includes("AZENK Graduation"), "existing account offered with the new system");
+  await s.click(".modal button[type=submit]");
+  await s.waitForSelector("text=تمت إضافة الأنظمة إلى الحساب الحالي");
+  await s.waitForSelector(".card:has-text('سجل المنح') >> text=AZENK Graduation");
+  ok(true, "system added to the existing account");
 
   // 3. Customer logs in → Demo Center
   await c.goto(`${B}/#/login`);
@@ -78,7 +102,7 @@ try {
   await c.click("button[type=submit]");
   await c.waitForSelector(".pcard");
   ok((await c.textContent(".hello h1")).includes("سارة اختبار"), "welcome with customer name");
-  ok((await c.$$(".pcard")).length === 2, "two product cards");
+  ok((await c.$$(".pcard")).length === 3, "three product cards (incl. the added system)");
   await c.waitForFunction(() => /^\d\d:\d\d:\d\d$/.test(document.querySelector("#clock-t").textContent));
   ok((await c.textContent("#clock-t")).startsWith("23:59") || (await c.textContent("#clock-t")).startsWith("24:00"), "countdown starts at 24h (server time)");
   await c.screenshot({ path: join(dataDir, "center.png") });

@@ -27,14 +27,14 @@ platform/
     public/          ui.js + ui.css (API client, shell, router, forms, tables, charts)
   apps/<app>/        app.js (permissions + routes), migrations/, public/, seed.js, server.js
   scripts/           bootstrap, seed-demo, check
-  tests/             node:test API tests (89) + tests/e2e/ browser flows
+  tests/             node:test API tests (94) + tests/e2e/ browser flows
 ```
 
 ## Run locally
 
 ```bash
 cd platform
-npm test                                   # 89 API tests (in-memory DBs)
+npm test                                   # 94 API tests (in-memory DBs)
 
 # Try it with fictional demo data (refuses to touch a non-empty DB):
 DEMO_PASSWORD='Choose-a-pass-2026' npm run seed:demo -- --app callcenter
@@ -65,21 +65,34 @@ generated and printed once.
 
 ## AZENK Demo Center (`apps/democenter`)
 
-This is the only way customers try AZENK products. Each approved request gets its own demo
-account. There are no shared or public demo logins.
+This is the only way customers try AZENK products. Each customer gets their own demo account.
+There are no shared or public demo logins.
 
-### Lifecycle
+### Lifecycle (current phase: manual, regular WhatsApp)
+
+There is no WhatsApp Business API, bot, automatic message reading or paid provider. WhatsApp is
+only a `wa.me` link with a ready message.
 
 ```
-website «اطلب Demo» ─► POST /api/demo/requests (PENDING)
-staff /admin/ ─► approve + choose products ─► demo account (PENDING, no expiry yet)
-                 one-time username + password shown once to staff, sent to the customer manually
+website «اطلب Demo» ─► regular WhatsApp (966507192393 from config.js) with a ready message:
+                       "السلام عليكم،\nأرغب في تجربة نظام <النظام>.\n\nالاسم:\nاسم المنشأة:\nعدد المستخدمين:\nملاحظات:"
+staff read it on their phone ─► /admin/ «+ حساب تجريبي»: name, phone, e-mail (optional), company,
+                 one or more systems ─► random username + strong random password (shown once)
+                 card: name · systems · username · password · first login · end of 24 h · status
+                 «نسخ بيانات الدخول» ─► paste into the customer's WhatsApp chat by hand
 customer logs in ─► first successful login: activated_at = now, expires_at = now + 24 h  (ACTIVE)
 Demo Center ─► a card per granted product ─► /demo-target/<product>/ (gate checks every request)
 expires_at passes ─► EXPIRED: «انتهت فترة التجربة» + «طلب النظام» / «التواصل مع AZENK» (WhatsApp)
 ```
 
-- **When the 24 hours start:** at the first successful login, not at approval. Until then,
+- **One open account per customer.** An account that is not started, active or suspended blocks
+  a second one for the same phone (any format: `05…`, `9665…`, `+9665…`) or e-mail. The API
+  answers `409 DEMO_EXISTS` with that account. The admin UI then offers to add the new systems to
+  it; the password and the 24 h window stay the same. After expiry, a new trial can be created.
+- **The optional web request form** (`POST /api/demo/requests`, staff «طلبات Demo») still works.
+  Approving a request for a customer with an open account takes `add_to_account`. Nothing links
+  to the form: the portal's «اطلب Demo» page also opens WhatsApp.
+- **When the 24 hours start:** at the first successful login, not at account creation. Until then,
   `activated_at` and `expires_at` are `NULL`. Later logins never move `expires_at`.
 - **Warnings:**
   - at 2 h: «تنتهي تجربتك خلال ساعتين.»
@@ -225,14 +238,15 @@ Staff endpoints:
 ```bash
 DEMO_PASSWORD='Choose-a-pass-2026' npm run seed:demo -- --app democenter
 npm run democenter                       # portal http://127.0.0.1:4400/  staff /admin/
-node --test tests/democenter.test.js     # 21 API tests with a fake clock (T+1h, T+23h, T+24h, T+25h)
+node --test tests/democenter.test.js     # 26 API tests with a fake clock (T+1h, T+23h, T+24h, T+25h)
 NODE_PATH_PW=$(npm root -g)/playwright node --disable-warning=ExperimentalWarning tests/e2e/democenter.e2e.mjs
 ```
 
 The E2E test runs the full flow in Chromium against an in-process server with a fake clock:
 
-1. request a demo;
-2. staff approve it;
+1. the customer's «اطلب Demo» opens WhatsApp with the ready message;
+2. staff create the account by hand, copy the credentials, and add a system to the same account
+   instead of creating a duplicate;
 3. the customer logs in;
 4. product A (browser) opens;
 5. product B (server, role SSO) opens;
@@ -253,8 +267,8 @@ Demo Center is a Node server, so it cannot run on GitHub Pages. It needs:
   site files);
 - backups.
 
-Then set `DEMO_CENTER_URL` in the site's `config.js` to switch «اطلب Demo» from WhatsApp to the
-request form.
+Then set `DEMO_CENTER_URL` in the site's `config.js` to show «تسجيل الدخول إلى Demo Center».
+«اطلب Demo» stays on WhatsApp.
 
 ### Offline browser previews (not published)
 

@@ -44,7 +44,7 @@
   AZ.can = (p) => AZ.state.perms.has(p);
 
   class ApiError extends Error {
-    constructor(status, message, fields) { super(message); this.status = status; this.fields = fields || null; }
+    constructor(status, message, fields, info) { super(message); this.status = status; this.fields = fields || null; this.code = (info && info.code) || null; this.details = (info && info.details) || null; }
   }
   AZ.ApiError = ApiError;
 
@@ -62,7 +62,7 @@
     if (!res.ok) {
       const msg = (data && data.error && data.error.message) || `خطأ ${res.status}`;
       if (res.status === 401 && !opts.noAuthRedirect) { AZ.state.user = null; AZ.renderLogin(); }
-      throw new ApiError(res.status, msg, data && data.error && data.error.fields);
+      throw new ApiError(res.status, msg, data && data.error && data.error.fields, data && data.error);
     }
     if (data && data.csrf) AZ.state.csrf = data.csrf;
     return data;

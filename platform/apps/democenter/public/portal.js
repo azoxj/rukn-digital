@@ -90,7 +90,7 @@
       ${fld("password", "كلمة المرور", `<input id="f-password" name="password" type="password" autocomplete="current-password" dir="ltr" required>`, true)}
       <p class="form-err" role="alert" hidden></p>
       <button class="btn btn--gold btn--block" type="submit">دخول</button>
-      <div class="auth__links"><a href="#/forgot">نسيت كلمة المرور؟</a><a href="#/request">ليس لديك حساب؟ اطلب Demo</a></div>
+      <div class="auth__links"><a href="#/forgot">نسيت كلمة المرور؟</a><a href="#/request">ليس لديك حساب؟ اطلب Demo عبر WhatsApp</a></div>
       <p class="auth__foot">AZENK · Digital · Technology · Creative</p>
     </form></main>`;
     const form = $("form", app);
@@ -210,48 +210,32 @@
     $("#back").addEventListener("click", async () => { try { await api("POST", "/api/demo/logout", {}); } catch (e) { /* ignore */ } S.ended = null; location.hash = "#/login"; viewLogin(); });
   }
 
-  /* ---------- request a demo ---------- */
+  /* ---------- request a demo (plain WhatsApp, no API/bot) ---------- */
+  // The request goes to AZENK's regular WhatsApp with a ready message; staff then create the
+  // account manually in the admin panel and send the credentials back.
+  const demoRequestText = (names) => ["السلام عليكم،", names.length > 1 ? `أرغب في تجربة الأنظمة: ${names.join("، ")}.` : `أرغب في تجربة نظام ${names[0] || "AZENK"}.`, "", "الاسم:", "اسم المنشأة:", "عدد المستخدمين:", "ملاحظات:"].join("\n");
   async function viewRequest(params) {
     document.title = "اطلب Demo | AZENK Demo Center";
     if (!S.config) { try { S.config = await api("GET", "/api/demo/config"); } catch (e) { app.innerHTML = `<p class="boot">${esc(e.message)}</p>`; return; } }
     const pre = (params.get("product") || "").split(",");
+    const n = S.config.whatsapp;
     app.innerHTML = `<main class="auth"><form class="auth__card auth__card--wide" novalidate>
       ${brand}
       <h1>اطلب تجربة Demo</h1>
-      <p class="lead">يراجع فريق AZENK طلبك ويرسل لك بيانات الدخول إلى Demo Center. مدة التجربة 24 ساعة تبدأ من أول تسجيل دخول.</p>
-      <div class="row2">
-        ${fld("customer_name", "الاسم", `<input id="f-customer_name" name="customer_name" autocomplete="name" required maxlength="120">`, true)}
-        ${fld("phone", "رقم الجوال", `<input id="f-phone" name="phone" type="tel" dir="ltr" autocomplete="tel" placeholder="05XXXXXXXX" required>`, true)}
-        ${fld("email", "البريد الإلكتروني", `<input id="f-email" name="email" type="email" dir="ltr" autocomplete="email">`)}
-        ${fld("company_name", "اسم المنشأة", `<input id="f-company_name" name="company_name" autocomplete="organization" required maxlength="160">`, true)}
-      </div>
+      <p class="lead">اختر النظام وأرسل الطلب عبر WhatsApp. يجهّز لك فريق AZENK حسابًا خاصًا ويرسل لك بيانات الدخول. مدة التجربة 24 ساعة تبدأ من أول تسجيل دخول.</p>
       <fieldset class="fld fld--set" data-f="products"><legend>النظام المطلوب <em>*</em></legend>
         <div class="checks">${S.config.products.map((p) => `<label class="check"><input type="checkbox" name="products" value="${esc(p.id)}"${pre.includes(p.id) ? " checked" : ""}><span><b dir="ltr">${esc(p.name)}</b><small>${esc(p.tagline)}</small></span></label>`).join("")}</div>
         <small class="err" hidden></small></fieldset>
-      <div class="row2">
-        ${fld("users_count", "عدد المستخدمين المتوقع", `<select id="f-users_count" name="users_count"><option value="">اختر…</option><option>1-5</option><option>6-20</option><option>21-100</option><option>100+</option></select>`)}
-      </div>
-      ${fld("notes", "ملاحظات", `<textarea id="f-notes" name="notes" rows="3" maxlength="2000" placeholder="ما الذي تريد تجربته؟"></textarea>`)}
-      <div class="hp" aria-hidden="true"><label>اترك هذا الحقل فارغًا<input name="website" tabindex="-1" autocomplete="off"></label></div>
-      <p class="form-err" role="alert" hidden></p>
-      <button class="btn btn--gold btn--block" type="submit">إرسال الطلب</button>
+      ${n ? '<button class="btn btn--wa btn--block" type="submit">إرسال الطلب عبر WhatsApp</button>' : '<p class="form-err">رقم WhatsApp غير مهيأ.</p>'}
       <div class="auth__links"><a href="#/login">لديك حساب؟ تسجيل الدخول</a></div>
     </form></main>`;
     const form = $("form", app);
-    form.addEventListener("submit", async (e) => {
+    form.addEventListener("submit", (e) => {
       e.preventDefault();
-      const el = form.elements, b = $("button[type=submit]", form);
-      const body = { customer_name: el.customer_name.value, phone: el.phone.value, email: el.email.value, company_name: el.company_name.value,
-        products: [...form.querySelectorAll("input[name=products]:checked")].map((x) => x.value), users_count: el.users_count.value || null, notes: el.notes.value, website: el.website.value };
-      b.disabled = true;
-      try {
-        fieldErrors(form, null);
-        await api("POST", "/api/demo/requests", body);
-        app.innerHTML = `<main class="auth"><div class="auth__card end">${brand}<div class="end__icon" aria-hidden="true">✓</div><h1>تم استلام طلبك</h1>
-          <p class="lead">سيراجع فريق AZENK طلبك، وعند الموافقة يصلك اسم المستخدم وكلمة المرور للدخول إلى Demo Center.</p>
-          <div class="end__actions"><a class="btn btn--gold" href="#/login">تسجيل الدخول إلى Demo Center</a></div></div></main>`;
-      } catch (err) { fieldErrors(form, err); }
-      finally { b.disabled = false; }
+      const ids = [...form.querySelectorAll("input[name=products]:checked")].map((x) => x.value);
+      if (!ids.length) return fieldErrors(form, { fields: { products: "اختر نظامًا واحدًا على الأقل" } });
+      fieldErrors(form, null);
+      window.open(`https://wa.me/${n}?text=${encodeURIComponent(demoRequestText(productNames(ids)))}`, "_blank", "noopener");
     });
   }
 
