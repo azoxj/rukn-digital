@@ -1,5 +1,7 @@
 # GitHub Pages (Jekyll) build settings.
-# The server products in platform/ need Node.js and are not served as static pages.
+# Server products (platform/), docs and build tools are not served as pages.
 exclude:
   - platform
   - docs
+  - tools
+  - tests

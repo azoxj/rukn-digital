@@ -1,224 +1,295 @@
 /* =========================================================
-   AZENK — site content data (services, products, work)
+   AZENK — site content data (systems, services, finder, work)
    ---------------------------------------------------------
-   Edit this file to add / change products, services or work.
    Every text has an Arabic (ar) and English (en) version.
 
-   PRODUCTS — only systems that are actually programmed.
-   - status: "ready" → جاهز (delivered/production version)
-             "demo"  → Demo متاح (a working demo exists)
+   PRODUCTS (الأنظمة) — only systems that are actually programmed
+   and tested. Never list an idea or an unbuilt system here.
+   - status: "ready" → جاهز       (usable now)
+             "demo"  → Demo متاح   (a real working demo exists)
              "dev"   → قيد التطوير (real code, not released yet)
-     Never list an idea or an unbuilt system as a product.
-   - demoUrl: link to a REAL working demo inside this site, or "".
-     Never add a demo link that does not exist.
-   - image: a real screenshot of the system (relative to the site
-     root), or null when no screenshot exists yet.
-   - No numeric prices are shown: every product is "price on request".
-     The WhatsApp order message is generated from the product name.
-
-   WORK
-   - status: "live" → a real delivered / published project
-             "demo" → a demo built by AZENK (labelled as demo)
+   - demo.type: "live"    → the demo opens on this site (demo.url)
+                "request" → server system; the demo is shown in a live
+                            session on request (WhatsApp)
+   - runtime: "browser" → runs in the browser, data stays on the device
+              "server"  → Node.js server + database + accounts/roles
+   - image: a real screenshot of the system (relative to site root).
+   - No numeric prices: every system is "price on request".
    ========================================================= */
 window.AZENK_DATA = {
-  /* ---------------- Services (separate from products) ---------------- */
-  services: [
-    {
-      id: "software",
-      icon: "code",
-      title: { ar: "تطوير أنظمة مخصصة", en: "Custom Systems Development" },
-      desc: { ar: "أنظمة وبرامج مبنية حسب احتياج عملك للأفراد والشركات.", en: "Systems and software built around how your business works." },
-      points: {
-        ar: ["أنظمة ويب ولوحات تحكم مخصصة", "أنظمة إدارة داخلية للشركات", "صلاحيات وأدوار للمستخدمين", "تطوير وتحسين أنظمة قائمة"],
-        en: ["Custom web systems and dashboards", "Internal management systems", "User roles and permissions", "Improving and extending existing systems"],
-      },
-      message: {
-        ar: "السلام عليكم، أرغب في تطوير نظام/برنامج وأود من AZENK معرفة التفاصيل.",
-        en: "Hello, I would like to develop a system/software and would like to know the details from AZENK.",
-      },
-    },
-    {
-      id: "web",
-      icon: "web",
-      title: { ar: "تطوير مواقع ومتاجر", en: "Websites & Online Stores" },
-      desc: { ar: "تصميم وتطوير مواقع ومتاجر إلكترونية احترافية.", en: "Professional websites and online stores, designed and built." },
-      points: {
-        ar: ["مواقع تعريفية للشركات والأفراد", "صفحات تسويقية وصفحات هبوط", "متاجر إلكترونية سهلة الإدارة", "تحسين السرعة والظهور في محركات البحث"],
-        en: ["Company and personal websites", "Marketing and landing pages", "Easy-to-manage online stores", "Speed and search-engine optimisation"],
-      },
-      message: {
-        ar: "السلام عليكم، أرغب في طلب خدمة تطوير موقع من AZENK وأود معرفة التفاصيل.",
-        en: "Hello, I would like to request a website development service from AZENK and would like to know the details.",
-      },
-    },
-    {
-      id: "automation",
-      icon: "flow",
-      title: { ar: "أتمتة وحلول رقمية", en: "Automation & Digital Solutions" },
-      desc: { ar: "أتمتة العمليات وربط الأنظمة وتحويل الإجراءات إلى حلول رقمية.", en: "Automating processes, connecting systems and digitising procedures." },
-      points: {
-        ar: ["أتمتة المهام المتكررة", "ربط الأنظمة والخدمات ببعضها", "تحويل النماذج الورقية إلى رقمية", "لوحات متابعة وتقارير"],
-        en: ["Automating repetitive tasks", "Connecting systems and services", "Turning paper forms into digital ones", "Dashboards and reporting"],
-      },
-      message: {
-        ar: "السلام عليكم، أرغب في طلب خدمة الأتمتة والحلول الرقمية من AZENK وأود معرفة التفاصيل.",
-        en: "Hello, I would like to request AZENK's automation and digital solutions service and would like to know the details.",
-      },
-    },
-    {
-      id: "branding",
-      icon: "pen",
-      title: { ar: "تصميم وهوية", en: "Design & Branding" },
-      desc: { ar: "هويات بصرية وتصاميم رقمية احترافية تعكس قيمة علامتك.", en: "Visual identities and professional digital design that reflect your brand." },
-      points: {
-        ar: ["تصميم الشعار والهوية البصرية", "دليل استخدام الهوية", "تصاميم السوشيال ميديا", "تصميم واجهات المواقع والتطبيقات"],
-        en: ["Logo and visual identity design", "Brand guidelines", "Social media design", "Website and app interface design"],
-      },
-      message: {
-        ar: "السلام عليكم، أرغب في طلب خدمة التصميم والهوية من AZENK وأود معرفة التفاصيل.",
-        en: "Hello, I would like to request AZENK's design and branding service and would like to know the details.",
-      },
-    },
-    {
-      id: "graduation",
-      icon: "graduation",
-      title: { ar: "مشاريع تخرج", en: "Graduation Projects" },
-      desc: { ar: "تطوير مشاريع التخرج التقنية مع التوثيق والشرح.", en: "Technical graduation projects, with documentation and explanation." },
-      points: {
-        ar: ["أنظمة ومواقع وتطبيقات ويب", "توثيق المشروع وشرح طريقة عمله", "تجهيز العرض التقديمي للمناقشة", "متابعة وتعديلات حسب الملاحظات"],
-        en: ["Systems, websites and web apps", "Project documentation and walkthrough", "Presentation for the final defence", "Follow-up and revisions based on feedback"],
-      },
-      message: {
-        ar: "السلام عليكم، أرغب في طلب خدمة مشروع تخرج من AZENK وأود معرفة التفاصيل.",
-        en: "Hello, I would like to request a graduation project service from AZENK and would like to know the details.",
-      },
-    },
-    {
-      id: "presentations",
-      icon: "slides",
-      title: { ar: "عروض PowerPoint", en: "PowerPoint Presentations" },
-      desc: { ar: "تصميم عروض تقديمية احترافية للشركات والأفراد والمشاريع.", en: "Professional presentations for companies, individuals and projects." },
-      points: {
-        ar: ["عروض تعريفية للشركات", "عروض المشاريع والمناقشات", "تحويل المحتوى إلى شرائح واضحة", "تصميم بهوية علامتك"],
-        en: ["Company profile presentations", "Project and defence presentations", "Turning content into clear slides", "Designed in your brand identity"],
-      },
-      message: {
-        ar: "السلام عليكم، أرغب في طلب تصميم عرض PowerPoint من AZENK وأود معرفة التفاصيل.",
-        en: "Hello, I would like to request a PowerPoint presentation design from AZENK and would like to know the details.",
-      },
-    },
-    {
-      id: "callcenter",
-      icon: "headset",
-      title: { ar: "حلول كول سنتر", en: "Call Center Solutions" },
-      desc: { ar: "حلول لتنظيم مراكز الاتصال وخدمة العملاء ومتابعة الطلبات.", en: "Solutions for organising call centres, customer service and request follow-up." },
-      points: {
-        ar: ["تنظيم متابعة الطلبات والتذاكر", "نصوص ومسارات للمكالمات", "تقارير أداء الخدمة", "ربط خدمة العملاء بأنظمة العمل"],
-        en: ["Request and ticket follow-up", "Call scripts and flows", "Service performance reports", "Linking customer service with business systems"],
-      },
-      message: {
-        ar: "السلام عليكم، أرغب في طلب حلول الكول سنتر من AZENK وأود معرفة التفاصيل.",
-        en: "Hello, I would like to request call center solutions from AZENK and would like to know the details.",
-      },
-    },
-  ],
-
-  /* ---------------- Products (only systems that are actually programmed) ---------------- */
+  /* ---------------- Systems (programmed and tested) ---------------- */
   products: [
     {
-      id: "easy-hr",
-      name: "Easy HR",
+      id: "azenk-hr",
+      name: "AZENK HR",
       status: "demo",
-      demoUrl: "easyhr/index.html",
-      image: "assets/work/easyhr.webp",
-      tagline: { ar: "نظام موارد بشرية متكامل", en: "Complete HR management system" },
+      demo: { type: "live", url: "easyhr/index.html" },
+      runtime: "browser",
+      image: "assets/work/azenk-hr.webp",
+      tagline: { ar: "نظام الموارد البشرية", en: "HR management system" },
       summary: {
-        ar: "إدارة الموظفين والحضور والإجازات والرواتب والأداء ونهاية الخدمة في نظام واحد.",
-        en: "Employees, attendance, leave, payroll, performance and end of service in one system.",
+        ar: "دورة حياة الموظف كاملة: الموظفون، الهيكل، الحضور، الإجازات، العقود، الرواتب، الأداء ونهاية الخدمة.",
+        en: "The full employee lifecycle: employees, structure, attendance, leave, contracts, payroll, performance and end of service.",
+      },
+      problem: {
+        ar: "ملفات إكسل متفرقة وطلبات ورقية وموافقات ضائعة لشؤون الموظفين.",
+        en: "Scattered spreadsheets, paper requests and lost approvals for employee affairs.",
       },
       description: {
-        ar: "Easy HR نظام موارد بشرية مبرمج بالكامل بواجهة عربية، يغطي دورة حياة الموظف من التوظيف والتهيئة إلى الحضور والإجازات والرواتب والأداء ونهاية الخدمة. النسخة المتاحة Demo تعمل في المتصفح ببيانات تجريبية، ويمكن تخصيص النظام وربطه بخادم وقاعدة بيانات عند التسليم.",
-        en: "Easy HR is a fully programmed Arabic HR system covering the employee lifecycle: recruitment and onboarding, attendance, leave, payroll, performance and end of service. The available demo runs in the browser with sample data; the system can be customised and connected to a server and database on delivery.",
+        ar: "AZENK HR نظام موارد بشرية مبرمج بواجهة عربية يغطي الموظفين والأقسام والوظائف والتوظيف والتهيئة، والحضور بالتحقق من الموقع والورديات، والإجازات والطلبات بمسارات موافقة، والعقود والمستندات والرواتب والسلف، والأداء والتدريب ونهاية الخدمة، مع صلاحيات حسب الدور وسجل تدقيق وتقارير. نسخة الـ Demo تعمل في المتصفح ببيانات تجريبية محفوظة على جهازك؛ ويُربط بخادم وقاعدة بيانات وتسجيل دخول حقيقي عند التنفيذ للمنشأة.",
+        en: "AZENK HR is a programmed Arabic HR system covering employees, departments, positions, recruitment and onboarding, geofenced attendance and shifts, leave and requests with approval flows, contracts, documents, payroll and advances, performance, training and end of service — with role-based permissions, an audit log and reports. The demo runs in the browser with sample data stored on your device; a server, database and real sign-in are set up when it is implemented for an organisation.",
       },
       features: {
-        ar: ["الموظفون والهيكل التنظيمي والتوظيف", "حضور وانصراف بالتحقق من الموقع (Geofence)", "الإجازات والطلبات بمسارات موافقة", "مسير رواتب وقسائم رواتب", "الأداء والتدريب ونهاية الخدمة", "صلاحيات حسب الدور وتقارير CSV"],
-        en: ["Employees, organisation and recruitment", "Geofenced attendance check-in", "Leave and requests with approval flows", "Payroll runs and payslips", "Performance, training and end of service", "Role-based access and CSV reports"],
+        ar: ["الموظفون والأقسام والوظائف والهيكل التنظيمي", "الحضور والانصراف بالتحقق من الموقع والورديات", "الإجازات والطلبات بمسارات موافقة", "العقود والمستندات والرواتب والسلف", "الأداء والتدريب ونهاية الخدمة", "أدوار وصلاحيات وسجل تدقيق وتقارير CSV"],
+        en: ["Employees, departments, positions and org chart", "Geofenced attendance and shifts", "Leave and requests with approval flows", "Contracts, documents, payroll and advances", "Performance, training and end of service", "Roles, permissions, audit log and CSV reports"],
+      },
+    },
+    {
+      id: "azenk-callcenter",
+      name: "AZENK Call Center",
+      status: "demo",
+      demo: { type: "request" },
+      runtime: "server",
+      image: "assets/work/callcenter.webp",
+      tagline: { ar: "نظام مركز الاتصال وخدمة العملاء", en: "Call centre & customer service system" },
+      summary: {
+        ar: "سجل العملاء والمكالمات والتذاكر والمتابعات وأداء الفريق في نظام واحد بصلاحيات واضحة.",
+        en: "Customers, calls, tickets, follow-ups and team performance in one system with clear permissions.",
+      },
+      problem: {
+        ar: "مكالمات لا تُسجَّل، وطلبات عملاء تضيع بين الموظفين، ولا توجد متابعة أو تقارير أداء.",
+        en: "Unlogged calls, customer requests lost between staff, and no follow-up or performance reports.",
+      },
+      description: {
+        ar: "AZENK Call Center نظام بخادم وقاعدة بيانات لإدارة خدمة العملاء: ملف لكل عميل بسجل تواصله، وتسجيل المكالمات الواردة والصادرة بمؤقت ومدة وحالة وملاحظات، وتذاكر بأولويات وحالات وإسناد وسجل تغييرات، ومتابعات ومهام بمواعيد، ولوحة تحكم وتقارير مع تصدير CSV، وبحث شامل وإشعارات وسجل تدقيق. الأدوار: مدير المنصة، مدير النظام، المشرف، موظف خدمة العملاء، مع عزل بيانات كل منشأة. يُسجَّل اتصال المكالمة داخل النظام؛ والربط مع مزود اتصال (VoIP) أو واتساب أو الرسائل يُنفَّذ كمشروع إضافي عند الطلب ولا يتضمنه النظام حاليًا.",
+        en: "AZENK Call Center is a server-backed system for customer service: a profile and contact history for every customer, logging inbound and outbound calls with a timer, duration, status and notes, tickets with priorities, statuses, assignment and change history, scheduled follow-ups and tasks, a dashboard and reports with CSV export, global search, notifications and an audit log. Roles: platform super admin, admin, supervisor and agent, with each organisation's data isolated. Calls are logged inside the system; connecting a telephony (VoIP) provider, WhatsApp or SMS is a separate project on request and is not included today.",
+      },
+      features: {
+        ar: ["العملاء وسجل التواصل الكامل لكل عميل", "تسجيل المكالمات بمؤقت ومدة وحالة وملاحظات", "التذاكر: أولوية، حالة، إسناد، سجل تغييرات", "متابعات ومهام بمواعيد وتنبيهات", "لوحة تحكم وتقارير أداء وتصدير CSV", "أدوار وصلاحيات وعزل بيانات وسجل تدقيق"],
+        en: ["Customers with full contact history", "Call logging with timer, duration, status and notes", "Tickets: priority, status, assignment, history", "Scheduled follow-ups and tasks with notifications", "Dashboard, performance reports and CSV export", "Roles, permissions, data isolation and audit log"],
+      },
+    },
+    {
+      id: "azenk-graduation",
+      name: "AZENK Graduation",
+      status: "demo",
+      demo: { type: "request" },
+      runtime: "server",
+      image: "assets/work/graduation.webp",
+      tagline: { ar: "نظام إدارة مشاريع التخرج", en: "Graduation project management" },
+      summary: {
+        ar: "المشاريع والفرق والمراحل والمهام والملفات وملاحظات المشرف والتقييم في منصة واحدة.",
+        en: "Projects, teams, milestones, tasks, files, supervisor feedback and evaluation on one platform.",
+      },
+      problem: {
+        ar: "متابعة مشاريع التخرج عبر البريد والمجموعات، وملفات وملاحظات متفرقة، وتقييم بلا معايير واضحة.",
+        en: "Graduation projects followed over e-mail and chat groups, scattered files and feedback, and evaluation without clear criteria.",
+      },
+      description: {
+        ar: "AZENK Graduation نظام بخادم وقاعدة بيانات للجامعات والكليات وجهات التدريب: إنشاء المشاريع وتحديد المشرف وفريق الطلاب، ومراحل بأوزان ومواعيد يسلّمها الطلاب ويعتمدها المشرف أو يطلب تعديلها، ولوحة مهام للفريق، ورفع ملفات موثّقة النوع، وملاحظات المشرف، وتقييم بمعايير ودرجات، ونسبة إنجاز محسوبة، ولوحات تحكم حسب الدور وتقارير مع تصدير CSV وإشعارات وسجل تدقيق. الأدوار: مدير النظام، المشرف، الطالب.",
+        en: "AZENK Graduation is a server-backed system for universities, colleges and training bodies: create projects with a supervisor and a student team, weighted milestones with due dates that students submit and supervisors approve or return, a team task board, type-checked file uploads, supervisor feedback, rubric-based evaluation, calculated progress, role-based dashboards, reports with CSV export, notifications and an audit log. Roles: admin, supervisor and student.",
+      },
+      features: {
+        ar: ["المشاريع والمشرفون وفرق الطلاب", "مراحل بأوزان: تسليم ← مراجعة ← اعتماد", "لوحة مهام للفريق بمواعيد ومسؤولين", "رفع وتنزيل الملفات مع التحقق من نوعها", "ملاحظات المشرف وتقييم بمعايير ودرجات", "نسبة إنجاز وتقارير وإشعارات وسجل تدقيق"],
+        en: ["Projects, supervisors and student teams", "Weighted milestones: submit → review → approve", "Team task board with owners and due dates", "Type-checked file upload and download", "Supervisor feedback and rubric evaluation", "Progress, reports, notifications and audit log"],
+      },
+    },
+    {
+      id: "azenk-presentations",
+      name: "AZENK Presentations",
+      status: "ready",
+      demo: { type: "live", url: "presentations/" },
+      runtime: "browser",
+      image: "assets/work/presentations.webp",
+      tagline: { ar: "إنشاء العروض وتصديرها إلى PowerPoint", en: "Build presentations and export to PowerPoint" },
+      summary: {
+        ar: "أنشئ عرضًا من قالب، حرّر الشرائح والنقاط والصور، اعرضه، ثم صدّره كملف PowerPoint ‎(.pptx).",
+        en: "Start from a template, edit slides, bullets and images, present, then export a PowerPoint (.pptx) file.",
+      },
+      problem: {
+        ar: "وقت طويل في ترتيب الشرائح وتنسيقها من الصفر لكل عرض.",
+        en: "Hours spent arranging and formatting slides from scratch for every presentation.",
+      },
+      description: {
+        ar: "AZENK Presentations أداة تعمل في المتصفح: اختر نوع العرض (تعريف شركة، مشروع، مشروع تخرج، مبيعات) والقالب، فتحصل على شرائح أولية تحرّرها: عناوين ونقاط ونصوص وصور وملاحظات المتحدث، مع إضافة وحذف وتكرار وإعادة ترتيب الشرائح وعرضها بملء الشاشة، ثم تصدير ملف PowerPoint حقيقي ‎(.pptx) يدعم العربية. تُحفظ العروض على جهازك، ويمكن حفظ نسخة JSON ونقلها. وللعروض التي يصممها فريق AZENK بالكامل تتوفر خدمة عروض PowerPoint.",
+        en: "AZENK Presentations runs in the browser: choose a presentation type (company profile, project, graduation project, sales) and a template to get starter slides, then edit titles, bullets, text, images and speaker notes, add, delete, duplicate and reorder slides, present full screen and export a real PowerPoint (.pptx) file with Arabic support. Presentations are saved on your device and can be saved and moved as JSON. For decks fully designed by the AZENK team, see the PowerPoint presentations service.",
+      },
+      features: {
+        ar: ["قوالب وأنواع عروض بشرائح أولية جاهزة", "7 تخطيطات: غلاف، قسم، نقاط، نص، صورة، خاتمة…", "إضافة وحذف وتكرار وإعادة ترتيب الشرائح", "صور وملاحظات المتحدث وعرض بملء الشاشة", "تصدير ملف PowerPoint حقيقي ‎(.pptx)", "حفظ تلقائي ونسخة JSON للنقل والاحتفاظ"],
+        en: ["Templates and deck types with starter slides", "7 layouts: cover, section, bullets, text, image, closing…", "Add, delete, duplicate and reorder slides", "Images, speaker notes and full-screen show", "Real PowerPoint (.pptx) export", "Autosave and JSON backup"],
       },
     },
     {
       id: "fleetpro",
       name: "FleetPro",
       status: "demo",
-      demoUrl: "fleetpro/index.html",
+      demo: { type: "live", url: "fleetpro/index.html" },
+      runtime: "browser",
       image: "assets/work/fleetpro.webp",
       tagline: { ar: "نظام إدارة الأسطول", en: "Fleet management system" },
       summary: {
-        ar: "متابعة المركبات والسائقين والصيانة والوقود والتأمين والمخالفات من لوحة واحدة.",
-        en: "Track vehicles, drivers, maintenance, fuel, insurance and violations from one dashboard.",
+        ar: "المركبات والسائقون والصيانة والوقود والتأمين والحوادث والمخالفات من لوحة واحدة.",
+        en: "Vehicles, drivers, maintenance, fuel, insurance, accidents and violations from one dashboard.",
+      },
+      problem: {
+        ar: "صيانات تفوت مواعيدها وتأمينات تنتهي دون تنبيه ومصاريف مركبات بلا متابعة.",
+        en: "Missed maintenance, insurance expiring without warning and untracked vehicle costs.",
       },
       description: {
-        ar: "FleetPro نظام ويب مبرمج لإدارة أساطيل المركبات، يجمع بيانات المركبات والسائقين وسجلات الصيانة والوقود والتأمين والحوادث والمخالفات مع تقارير ولوحة تحكم. النسخة المتاحة Demo تعمل في المتصفح ببيانات تجريبية، ويمكن تخصيصها حسب طبيعة أسطولك.",
-        en: "FleetPro is a programmed web system for managing vehicle fleets. It brings together vehicles, drivers, maintenance, fuel, insurance, accidents and violations, with reports and a dashboard. The available demo runs in the browser with sample data and can be customised to your fleet.",
+        ar: "FleetPro نظام ويب مبرمج لإدارة أساطيل المركبات: سجل المركبات والسائقين والإسناد، وجدولة الصيانة وتسجيل إنجازها، والوقود، والتأمين مع تنبيهات الانتهاء، والحوادث والمخالفات، ولوحة تحكم وتقارير مع تصدير CSV. نسخة الـ Demo تعمل في المتصفح ببيانات تجريبية، وتُخصَّص وتُربط بخادم عند التنفيذ.",
+        en: "FleetPro is a programmed web system for vehicle fleets: vehicle and driver records and assignment, maintenance scheduling and completion, fuel, insurance with expiry alerts, accidents and violations, plus a dashboard and reports with CSV export. The demo runs in the browser with sample data and is customised and connected to a server on implementation.",
       },
       features: {
-        ar: ["سجل المركبات والسائقين", "الصيانة والوقود", "التأمين والحوادث والمخالفات", "لوحة تحكم وتقارير مع تصدير CSV"],
-        en: ["Vehicle and driver records", "Maintenance and fuel", "Insurance, accidents and violations", "Dashboard and reports with CSV export"],
+        ar: ["سجل المركبات والسائقين وإسناد المركبات", "جدولة الصيانة وتسجيل إنجازها", "التأمين مع تنبيهات الانتهاء", "الوقود والحوادث والمخالفات", "لوحة تحكم وتقارير وتصدير CSV"],
+        en: ["Vehicle and driver records and assignment", "Maintenance scheduling and completion", "Insurance with expiry alerts", "Fuel, accidents and violations", "Dashboard, reports and CSV export"],
       },
     },
     {
       id: "clinicflow",
       name: "ClinicFlow",
       status: "demo",
-      demoUrl: "clinicflow/index.html",
+      demo: { type: "live", url: "clinicflow/index.html" },
+      runtime: "browser",
       image: "assets/work/clinicflow.webp",
       tagline: { ar: "نظام إدارة العيادات", en: "Clinic management system" },
       summary: {
-        ar: "إدارة المرضى والمواعيد والأطباء والعيادات والفواتير والتقارير.",
-        en: "Manage patients, appointments, doctors, clinics, invoices and reports.",
+        ar: "المرضى والمواعيد والأطباء والعيادات والفواتير والتقارير.",
+        en: "Patients, appointments, doctors, clinics, invoices and reports.",
+      },
+      problem: {
+        ar: "حجوزات متعارضة وملفات مرضى ورقية وفواتير يصعب متابعة تحصيلها.",
+        en: "Conflicting bookings, paper patient files and invoices that are hard to follow up.",
       },
       description: {
-        ar: "ClinicFlow نظام ويب مبرمج لإدارة العيادات والمجمعات الطبية، يشمل ملفات المرضى وجدولة المواعيد ومتابعة الأطباء والعيادات والفواتير والتقارير والإشعارات. النسخة المتاحة Demo تعمل في المتصفح ببيانات تجريبية وليست للاستخدام الطبي الفعلي قبل التخصيص والربط بخادم آمن.",
-        en: "ClinicFlow is a programmed web system for clinics and medical centres, covering patient records, appointment scheduling, doctors, clinics, invoices, reports and notifications. The available demo runs in the browser with sample data and is not for real medical use before customisation and a secure server setup.",
+        ar: "ClinicFlow نظام ويب مبرمج للعيادات والمجمعات الطبية: ملفات المرضى، وجدولة المواعيد ومنع التعارض، والأطباء والعيادات، والفواتير والتحصيل، والإشعارات والتقارير مع تصدير CSV. نسخة الـ Demo تعمل في المتصفح ببيانات تجريبية وليست للاستخدام الطبي الفعلي قبل التخصيص والربط بخادم آمن.",
+        en: "ClinicFlow is a programmed web system for clinics and medical centres: patient records, conflict-free appointment scheduling, doctors and clinics, invoices and collection, notifications and reports with CSV export. The demo runs in the browser with sample data and is not for real medical use before customisation and a secure server setup.",
       },
       features: {
-        ar: ["ملفات المرضى وسجل الزيارات", "جدولة المواعيد ومنع التعارض", "الأطباء والعيادات", "الفواتير والتقارير مع تصدير CSV"],
-        en: ["Patient records and visit history", "Appointment scheduling without conflicts", "Doctors and clinics", "Invoices and reports with CSV export"],
-      },
-    },
-    {
-      id: "easy-fleet",
-      name: "Easy Fleet",
-      status: "dev",
-      demoUrl: "",
-      image: null,
-      tagline: { ar: "نظام إدارة المركبات والمشاريع", en: "Vehicle and project management" },
-      summary: {
-        ar: "نظام بخادم وقاعدة بيانات لإدارة المركبات والمشاريع والإسنادات — المرحلة الأولى مكتملة.",
-        en: "A server-backed system for vehicles, projects and assignments — first phase completed.",
-      },
-      description: {
-        ar: "Easy Fleet نظام قيد التطوير مبني بخادم وقاعدة بيانات حقيقية. اكتملت مرحلته الأولى: تسجيل الدخول الآمن، المستخدمون والأدوار والصلاحيات، المشاريع والإسنادات، المركبات، لوحة التحكم، سجل التدقيق والإشعارات. لا تتوفر له نسخة Demo عامة بعد، ويمكنك التواصل لمعرفة موعد توفره.",
-        en: "Easy Fleet is in development, built on a real server and database. Its first phase is complete: secure sign-in, users, roles and permissions, projects and assignments, vehicles, a dashboard, an audit log and notifications. No public demo is available yet; contact us to learn when it will be available.",
-      },
-      features: {
-        ar: ["تسجيل دخول آمن وصلاحيات حسب الدور", "المشاريع والإسنادات", "إدارة المركبات وسجلها الزمني", "سجل تدقيق وإشعارات"],
-        en: ["Secure sign-in and role-based permissions", "Projects and assignments", "Vehicle management and timeline", "Audit log and notifications"],
+        ar: ["ملفات المرضى وسجل الزيارات", "جدولة المواعيد ومنع التعارض", "الأطباء والعيادات", "الفواتير والتحصيل", "الإشعارات والتقارير وتصدير CSV"],
+        en: ["Patient records and visit history", "Conflict-free appointment scheduling", "Doctors and clinics", "Invoices and collection", "Notifications, reports and CSV export"],
       },
     },
   ],
 
-  /* ---------------- Work categories ---------------- */
+  /* ---------------- Services (custom work, separate from systems) ---------------- */
+  services: [
+    {
+      id: "software", icon: "code", related: ["azenk-hr", "azenk-callcenter"],
+      title: { ar: "تطوير أنظمة مخصصة", en: "Custom Software" },
+      desc: { ar: "أنظمة ويب ولوحات تحكم مبنية حول طريقة عملك، بصلاحيات وقاعدة بيانات.", en: "Web systems and dashboards built around how you work, with roles and a database." },
+      points: { ar: ["تحليل المتطلبات وتصميم النظام", "واجهات عربية وإنجليزية", "أدوار وصلاحيات وسجل تدقيق", "تطوير أنظمة قائمة وتحسينها"], en: ["Requirements analysis and system design", "Arabic and English interfaces", "Roles, permissions and audit log", "Improving and extending existing systems"] },
+    },
+    {
+      id: "web", icon: "web", related: [],
+      title: { ar: "تطوير المواقع", en: "Websites" },
+      desc: { ar: "مواقع تعريفية وصفحات هبوط سريعة وثنائية اللغة ومهيأة لمحركات البحث.", en: "Fast, bilingual company sites and landing pages, optimised for search engines." },
+      points: { ar: ["مواقع الشركات والأفراد", "صفحات هبوط للحملات", "تصميم متجاوب لكل الشاشات", "تحسين السرعة والظهور في البحث"], en: ["Company and personal websites", "Campaign landing pages", "Responsive on every screen", "Speed and search optimisation"] },
+    },
+    {
+      id: "ecommerce", icon: "cart", related: [],
+      title: { ar: "المتاجر الإلكترونية", en: "E-commerce" },
+      desc: { ar: "متاجر إلكترونية سهلة الإدارة، أو تجهيز متجرك على منصة قائمة.", en: "Easy-to-manage online stores, or setting up your store on an existing platform." },
+      points: { ar: ["تصميم واجهة المتجر وصفحات المنتجات", "إعداد المنتجات والتصنيفات والشحن", "ربط بوابات الدفع المعتمدة لدى المنصة", "تقارير الطلبات والمبيعات"], en: ["Storefront and product page design", "Products, categories and shipping setup", "Connecting the platform's supported payment gateways", "Order and sales reports"] },
+    },
+    {
+      id: "automation", icon: "flow", related: [],
+      title: { ar: "الأتمتة", en: "Automation" },
+      desc: { ar: "تحويل الإجراءات اليدوية والمتكررة إلى خطوات رقمية تلقائية.", en: "Turning manual, repetitive procedures into automatic digital steps." },
+      points: { ar: ["أتمتة المهام المتكررة والتقارير", "نماذج رقمية بدل الورق", "تنبيهات ومسارات موافقة", "لوحات متابعة"], en: ["Automating repetitive tasks and reports", "Digital forms instead of paper", "Alerts and approval flows", "Monitoring dashboards"] },
+    },
+    {
+      id: "business", icon: "building", related: ["azenk-hr", "azenk-callcenter", "fleetpro", "clinicflow"],
+      title: { ar: "حلول الأعمال", en: "Business Solutions" },
+      desc: { ar: "تطبيق أنظمة AZENK في منشأتك وتخصيصها لإجراءاتك وبياناتك.", en: "Implementing AZENK systems in your organisation and tailoring them to your processes and data." },
+      points: { ar: ["تخصيص الأنظمة لإجراءات المنشأة", "نقل البيانات من الإكسل أو نظام قديم", "تدريب المستخدمين", "دعم ما بعد التشغيل"], en: ["Tailoring systems to your processes", "Migrating data from spreadsheets or a legacy system", "User training", "Post-launch support"] },
+    },
+    {
+      id: "graduation", icon: "graduation", related: ["azenk-graduation", "azenk-presentations"],
+      title: { ar: "مشاريع التخرج", en: "Graduation Projects" },
+      desc: { ar: "مساعدة الطلاب في تطوير مشاريعهم التقنية وتوثيقها وفهمها للمناقشة.", en: "Helping students build, document and understand their technical projects for the defence." },
+      points: { ar: ["أنظمة ومواقع وتطبيقات ويب", "التوثيق وشرح طريقة العمل", "تجهيز عرض المناقشة", "تعديلات حسب ملاحظات المشرف"], en: ["Systems, websites and web apps", "Documentation and walkthrough", "Defence presentation", "Revisions based on supervisor feedback"] },
+    },
+    {
+      id: "presentations", icon: "slides", related: ["azenk-presentations"],
+      title: { ar: "عروض PowerPoint", en: "PowerPoint Presentations" },
+      desc: { ar: "تصميم عروض تقديمية احترافية للشركات والمشاريع والمناقشات.", en: "Professional presentations for companies, projects and defences." },
+      points: { ar: ["ملفات تعريف الشركات", "عروض المشاريع والمبيعات", "تحويل المحتوى إلى شرائح واضحة", "تصميم بهوية علامتك"], en: ["Company profiles", "Project and sales decks", "Turning content into clear slides", "Designed in your brand identity"] },
+    },
+    {
+      id: "callcenter", icon: "headset", related: ["azenk-callcenter"],
+      title: { ar: "حلول الكول سنتر", en: "Call Center Solutions" },
+      desc: { ar: "تنظيم خدمة العملاء: نظام، ومسارات عمل، ونصوص مكالمات، وتقارير أداء.", en: "Organising customer service: a system, workflows, call scripts and performance reports." },
+      points: { ar: ["تطبيق AZENK Call Center وتخصيصه", "مسارات التذاكر والتصعيد", "نصوص ومسارات المكالمات", "مؤشرات وتقارير الأداء"], en: ["Implementing and tailoring AZENK Call Center", "Ticket and escalation workflows", "Call scripts and flows", "Performance indicators and reports"] },
+    },
+    {
+      id: "integration", icon: "plug", related: [],
+      title: { ar: "ربط الأنظمة", en: "System Integration" },
+      desc: { ar: "ربط أنظمتك ببعضها أو بخدمات خارجية عبر واجهات برمجية (API) وتبادل البيانات.", en: "Connecting your systems to each other or to external services through APIs and data exchange." },
+      points: { ar: ["ربط عبر واجهات API", "استيراد وتصدير البيانات", "مزامنة بين الأنظمة", "توثيق الربط واختباره"], en: ["API integrations", "Data import and export", "Synchronisation between systems", "Documented, tested integrations"] },
+    },
+    {
+      id: "transformation", icon: "spark", related: [],
+      title: { ar: "التحول الرقمي", en: "Digital Transformation" },
+      desc: { ar: "دراسة إجراءاتك الحالية ووضع خطة عملية لتحويلها إلى حلول رقمية على مراحل.", en: "Reviewing your current procedures and drawing a practical, phased plan to digitise them." },
+      points: { ar: ["تحليل الوضع الحالي", "تحديد الأولويات والمراحل", "اختيار الحل: جاهز أو مخصص", "متابعة التنفيذ والقياس"], en: ["Current-state analysis", "Priorities and phases", "Choosing ready or custom solutions", "Implementation follow-up and measurement"] },
+    },
+  ],
+
+  /* ---------------- Solution finder (rule-based, not AI) ---------------- */
+  finder: {
+    questions: [
+      { id: "activity", type: "single", label: { ar: "ما نشاطك؟", en: "What is your activity?" }, options: [
+        ["company", { ar: "شركة أو منشأة", en: "Company or business" }],
+        ["callcenter", { ar: "خدمة عملاء / مركز اتصال", en: "Customer service / call centre" }],
+        ["education", { ar: "جامعة أو كلية أو جهة تدريب", en: "University, college or training body" }],
+        ["clinic", { ar: "عيادة أو مركز طبي", en: "Clinic or medical centre" }],
+        ["fleet", { ar: "نقل أو أسطول مركبات", en: "Transport or vehicle fleet" }],
+        ["student", { ar: "طالب أو فرد", en: "Student or individual" }],
+        ["other", { ar: "أخرى", en: "Other" }],
+      ] },
+      { id: "size", type: "single", label: { ar: "حجم المنشأة", en: "Organisation size" }, options: [
+        ["solo", { ar: "فرد", en: "Individual" }], ["small", { ar: "صغيرة (حتى 10)", en: "Small (up to 10)" }],
+        ["medium", { ar: "متوسطة (11 – 100)", en: "Medium (11–100)" }], ["large", { ar: "كبيرة (أكثر من 100)", en: "Large (100+)" }],
+      ] },
+      { id: "users", type: "single", label: { ar: "كم شخصًا سيستخدم النظام؟", en: "How many people will use the system?" }, options: [
+        ["1-5", { ar: "1 – 5", en: "1–5" }], ["6-20", { ar: "6 – 20", en: "6–20" }], ["21-100", { ar: "21 – 100", en: "21–100" }], ["100+", { ar: "أكثر من 100", en: "100+" }],
+      ] },
+      { id: "problems", type: "multi", label: { ar: "ما المشكلة التي تريد حلها؟ (اختر كل ما ينطبق)", en: "What do you want to solve? (choose all that apply)" }, options: [
+        ["hr", { ar: "شؤون الموظفين والحضور والإجازات", en: "Employee affairs, attendance and leave" }],
+        ["customers", { ar: "متابعة العملاء والمكالمات والشكاوى", en: "Customers, calls and complaints" }],
+        ["projects", { ar: "متابعة مشاريع التخرج أو الفرق", en: "Following graduation projects or teams" }],
+        ["vehicles", { ar: "المركبات والصيانة والتأمين", en: "Vehicles, maintenance and insurance" }],
+        ["appointments", { ar: "المواعيد والمرضى والفواتير", en: "Appointments, patients and invoices" }],
+        ["slides", { ar: "إعداد عروض تقديمية", en: "Preparing presentations" }],
+        ["website", { ar: "موقع أو متجر إلكتروني", en: "A website or online store" }],
+        ["manual", { ar: "إجراءات ورقية أو يدوية متكررة", en: "Paper or repetitive manual procedures" }],
+        ["integration", { ar: "أنظمة غير مترابطة", en: "Disconnected systems" }],
+      ] },
+      { id: "current", type: "single", label: { ar: "ما الذي تستخدمه حاليًا؟", en: "What do you use today?" }, options: [
+        ["none", { ar: "ورق أو إكسل", en: "Paper or spreadsheets" }], ["unfit", { ar: "نظام جاهز لا يناسبنا", en: "A ready system that doesn't fit" }],
+        ["legacy", { ar: "نظام قديم نريد تطويره", en: "A legacy system to improve" }], ["many", { ar: "عدة أنظمة غير مترابطة", en: "Several disconnected systems" }],
+      ] },
+      { id: "need", type: "single", label: { ar: "ما الأنسب لك؟", en: "What suits you best?" }, options: [
+        ["ready", { ar: "نظام جاهز أبدأ به بسرعة", en: "A ready system to start quickly" }], ["custom", { ar: "نظام مخصص بالكامل", en: "A fully custom system" }],
+        ["improve", { ar: "تطوير أو ربط ما لدي", en: "Improve or connect what I have" }], ["advice", { ar: "استشارة أولًا", en: "Advice first" }],
+      ] },
+    ],
+    // problem → systems that address it
+    problemSystems: { hr: ["azenk-hr"], customers: ["azenk-callcenter"], projects: ["azenk-graduation"], vehicles: ["fleetpro"], appointments: ["clinicflow"], slides: ["azenk-presentations"] },
+    // activity → systems that usually fit
+    activitySystems: { company: ["azenk-hr"], callcenter: ["azenk-callcenter"], education: ["azenk-graduation"], clinic: ["clinicflow"], fleet: ["fleetpro"], student: ["azenk-presentations"] },
+    // problem → services
+    problemServices: { website: ["web", "ecommerce"], manual: ["automation", "transformation"], integration: ["integration"], slides: ["presentations"], projects: ["graduation"], customers: ["callcenter"] },
+  },
+
+  /* ---------------- Work (only real AZENK-built items) ---------------- */
   categories: [
     { id: "software", label: { ar: "الأنظمة", en: "Systems" } },
     { id: "websites", label: { ar: "المواقع والمتاجر", en: "Websites & Stores" } },
     { id: "automation", label: { ar: "الأتمتة والحلول الرقمية", en: "Automation & Digital" } },
-    { id: "design", label: { ar: "التصميم والهوية", en: "Design & Branding" } },
     { id: "graduation", label: { ar: "مشاريع التخرج", en: "Graduation Projects" } },
     { id: "presentations", label: { ar: "العروض التقديمية", en: "Presentations" } },
   ],
-
-  /* ---------------- Work (only real AZENK-built items) ----------------
-     Programmed systems are listed under products (not repeated here). */
   work: [
     {
       id: "azenk-site",
@@ -228,8 +299,8 @@ window.AZENK_DATA = {
       image: "assets/work/azenk-site.webp",
       url: "",
       desc: {
-        ar: "الموقع الرسمي لـ AZENK بهوية فاخرة، ثنائي اللغة، مع طلب المنتجات والخدمات عبر واتساب.",
-        en: "AZENK's official bilingual website with a premium identity and WhatsApp ordering for products and services.",
+        ar: "الموقع الرسمي لـ AZENK: ثنائي اللغة، يعرض الأنظمة والخدمات مع طلب الحلول عبر واتساب.",
+        en: "AZENK's official bilingual website presenting the systems and services, with requests over WhatsApp.",
       },
     },
   ],

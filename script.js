@@ -3,8 +3,9 @@
    - Header / mobile navigation / footer / floating WhatsApp
    - Arabic (RTL) ⇄ English (LTR) language switch
    - WhatsApp links generated from config.js (one number, one place)
-   - Services, products and work rendered from data.js
-   - Project request form → organised WhatsApp message
+   - Systems, services and work rendered from data.js
+   - Solution finder (rule-based) and request forms → organised
+     WhatsApp messages
    No libraries, no payments, no backend.
    ========================================================= */
 (() => {
@@ -43,12 +44,14 @@
   // UI strings used by the script-rendered parts (header, footer, cards, modal, form)
   const UI = {
     home: { ar: "الرئيسية", en: "Home" },
-    products: { ar: "المنتجات", en: "Products" },
+    products: { ar: "الأنظمة", en: "Systems" },
+    solutions: { ar: "الحلول", en: "Solutions" },
+    build: { ar: "ابنِ نظامك", en: "Build your system" },
     services: { ar: "الخدمات", en: "Services" },
     work: { ar: "أعمالنا", en: "Our Work" },
     about: { ar: "من نحن", en: "About" },
     contact: { ar: "تواصل معنا", en: "Contact" },
-    startProject: { ar: "ابدأ مشروعك", en: "Start your project" },
+    startProject: { ar: "اطلب حلًا", en: "Request a solution" },
     menu: { ar: "القائمة", en: "Menu" },
     openMenu: { ar: "فتح القائمة", en: "Open menu" },
     closeMenu: { ar: "إغلاق القائمة", en: "Close menu" },
@@ -69,6 +72,17 @@
     rights: { ar: "جميع الحقوق محفوظة.", en: "All rights reserved." },
     orderNow: { ar: "اطلب الآن", en: "Order now" },
     details: { ar: "التفاصيل", en: "Details" },
+    explore: { ar: "استكشف النظام", en: "Explore the system" },
+    tryDemo: { ar: "جرّب الـ Demo", en: "Try the demo" },
+    tryNow: { ar: "جرّب الآن", en: "Try it now" },
+    requestDemo: { ar: "اطلب Demo", en: "Request a demo" },
+    requestQuote: { ar: "اطلب عرض السعر", en: "Request a quote" },
+    problemLabel: { ar: "المشكلة التي يحلها", en: "The problem it solves" },
+    runtimeBrowser: { ar: "يعمل في المتصفح", en: "Runs in the browser" },
+    runtimeServer: { ar: "خادم + قاعدة بيانات", en: "Server + database" },
+    runtimeBrowserNote: { ar: "نسخة تعمل في المتصفح، والبيانات تُحفظ على جهازك.", en: "Runs in the browser; data is stored on your device." },
+    runtimeServerNote: { ar: "نظام بخادم وقاعدة بيانات وحسابات وصلاحيات. يُعرض الـ Demo في جلسة مباشرة عند الطلب.", en: "A server system with a database, accounts and permissions. The demo is shown in a live session on request." },
+    relatedSystems: { ar: "أنظمة ذات صلة", en: "Related systems" },
     requestService: { ar: "اطلب الخدمة", en: "Request service" },
     priceOnRequest: { ar: "السعر عند الطلب", en: "Price on request" },
     features: { ar: "المزايا", en: "Features" },
@@ -98,9 +112,11 @@
     errName: { ar: "يرجى إدخال الاسم", en: "Please enter your name" },
     errPhone: { ar: "يرجى إدخال رقم جوال صحيح، مثل 05XXXXXXXX", en: "Please enter a valid mobile number, e.g. 05XXXXXXXX" },
     errEmail: { ar: "صيغة البريد الإلكتروني غير صحيحة", en: "Please enter a valid email address" },
-    errService: { ar: "يرجى اختيار نوع الخدمة", en: "Please choose a service" },
+    errService: { ar: "يرجى اختيار النوع", en: "Please choose a type" },
+    errBusiness: { ar: "يرجى كتابة النشاط أو اسم الجهة", en: "Please enter your business or organisation" },
+    mailSent: { ar: "تم فتح برنامج البريد برسالة جاهزة. أرسلها من هناك.", en: "Your mail app opened with a ready message. Send it from there." },
     errDetails: { ar: "يرجى كتابة تفاصيل المشروع (10 أحرف على الأقل)", en: "Please describe your project (at least 10 characters)" },
-    optReady: { ar: "منتج جاهز من منتجات AZENK", en: "A ready AZENK product" },
+    optReady: { ar: "نظام جاهز من أنظمة AZENK", en: "A ready AZENK system" },
     optCustom: { ar: "مشروع مخصص", en: "Custom project" },
     optOther: { ar: "أخرى", en: "Other" },
     choose: { ar: "اختر نوع الخدمة", en: "Choose a service" },
@@ -124,33 +140,45 @@
   const findService = (id) => DATA.services.find((s) => s.id === id);
   const findWork = (id) => DATA.work.find((w) => w.id === id);
 
-  // Message for each data-wa key ("start", "general", "service:web", "product:easy-fleet", ...)
+  // Message for each data-wa key ("start", "general", "service:web", "product:azenk-hr",
+  // "demo:azenk-callcenter", "quote:azenk-hr", "work:azenk-site"). Requests carry
+  // empty fields for the customer to fill in WhatsApp.
+  const form = (lines) => lines.join("\n");
+  const fieldsAr = ["الاسم:", "النشاط:", "عدد المستخدمين:", "ملاحظات:"];
+  const fieldsEn = ["Name:", "Business:", "Number of users:", "Notes:"];
   const waMessages = {
-    start: () => (lang === "ar" ? "السلام عليكم، أرغب في بدء مشروع مع AZENK وأود معرفة التفاصيل." : "Hello, I would like to start a project with AZENK and would like to know the details."),
+    start: () => (lang === "ar"
+      ? form(["السلام عليكم، أرغب في طلب حل تقني من AZENK.", "", "الاسم:", "النشاط:", "الاحتياج:", "ملاحظات:"])
+      : form(["Hello, I would like to request a technology solution from AZENK.", "", "Name:", "Business:", "Need:", "Notes:"])),
     general: () => (lang === "ar" ? "السلام عليكم، أرغب في التواصل مع AZENK." : "Hello, I would like to get in touch with AZENK."),
-    individuals: () => (lang === "ar" ? "السلام عليكم، لدي فكرة وأرغب في تحويلها إلى مشروع رقمي مع AZENK. أود معرفة التفاصيل." : "Hello, I have an idea and would like to turn it into a digital project with AZENK. I would like to know the details."),
-    business: () => (lang === "ar" ? "السلام عليكم، أمثّل شركة/منشأة وأرغب في حلول تقنية من AZENK لتطوير أعمالنا. أود معرفة التفاصيل." : "Hello, I represent a company and would like AZENK's technology solutions to grow our business. I would like to know the details."),
-    custom: () => (lang === "ar" ? "السلام عليكم، أرغب في طلب مشروع مخصص من AZENK وأود معرفة التفاصيل." : "Hello, I would like to request a custom project from AZENK and would like to know the details."),
     service: (id) => {
-      const s = findService(id);
-      return s ? t(s.message) : waMessages.general();
+      const sv = findService(id);
+      if (!sv) return waMessages.general();
+      return lang === "ar"
+        ? form([`السلام عليكم، أرغب في خدمة «${t(sv.title)}» من AZENK.`, "", "الاسم:", "النشاط:", "تفاصيل الطلب:"])
+        : form([`Hello, I would like AZENK's "${t(sv.title)}" service.`, "", "Name:", "Business:", "Request details:"]);
     },
     product: (id) => {
       const p = findProduct(id);
       if (!p) return waMessages.general();
-      if (p.status === "dev") {
-        return lang === "ar"
-          ? `السلام عليكم، أرغب في طلب منتج ${p.name} من AZENK عند توفره. أود معرفة التفاصيل وموعد الإطلاق.`
-          : `Hello, I would like to order ${p.name} from AZENK when it becomes available. I would like to know the details and the launch date.`;
-      }
+      return lang === "ar" ? form([`السلام عليكم، أرغب في معرفة تفاصيل نظام ${p.name}.`, "", ...fieldsAr]) : form([`Hello, I would like to know the details of ${p.name}.`, "", ...fieldsEn]);
+    },
+    demo: (id) => {
+      const p = findProduct(id);
+      if (!p) return waMessages.general();
       return lang === "ar"
-        ? `السلام عليكم، أرغب في طلب منتج ${p.name} من AZENK. أود معرفة التفاصيل وطريقة الحصول عليه.`
-        : `Hello, I would like to order ${p.name} from AZENK. I would like to know the details and how to get it.`;
+        ? form([`السلام عليكم، أرغب في طلب Demo لنظام ${p.name}.`, "", "الاسم:", "النشاط:", "عدد المستخدمين:", "الوقت المناسب للعرض:"])
+        : form([`Hello, I would like to request a demo of ${p.name}.`, "", "Name:", "Business:", "Number of users:", "Preferred time for the demo:"]);
+    },
+    quote: (id) => {
+      const p = findProduct(id);
+      if (!p) return waMessages.general();
+      return lang === "ar" ? form([`السلام عليكم، أرغب في عرض سعر لنظام ${p.name}.`, "", ...fieldsAr]) : form([`Hello, I would like a quote for ${p.name}.`, "", ...fieldsEn]);
     },
     work: (id) => {
       const w = findWork(id);
       const name = w ? w.title : "";
-      return lang === "ar" ? `السلام عليكم، أرغب في مشروع مشابه لـ ${name} من AZENK. أود معرفة التفاصيل.` : `Hello, I would like a project similar to ${name} from AZENK. I would like to know the details.`;
+      return lang === "ar" ? form([`السلام عليكم، أرغب في مشروع مشابه لـ ${name} من AZENK.`, "", "الاسم:", "النشاط:", "تفاصيل الطلب:"]) : form([`Hello, I would like a project similar to ${name} from AZENK.`, "", "Name:", "Business:", "Request details:"]);
     },
   };
   const waText = (key) => {
@@ -202,6 +230,12 @@
     external: '<path d="M14 4h6v6M20 4l-9 9M19 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1h5"/>',
     menu: '<path d="M4 7h16M4 12h16M4 17h10"/>',
     globe: '<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/>',
+    server: '<rect x="3" y="4" width="18" height="7" rx="1.5"/><rect x="3" y="13" width="18" height="7" rx="1.5"/><path d="M7 7.5h.01M7 16.5h.01M11 7.5h6M11 16.5h6"/>',
+    cart: '<path d="M3 4h2l2.2 10.5a1.5 1.5 0 0 0 1.5 1.2h8.6a1.5 1.5 0 0 0 1.5-1.1L21 8H6"/><circle cx="9.5" cy="19.5" r="1.3"/><circle cx="17" cy="19.5" r="1.3"/>',
+    plug: '<path d="M9 3v5M15 3v5M6 8h12v3a6 6 0 0 1-12 0V8zM12 17v4"/>',
+    info: '<circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/>',
+    target: '<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.2"/>',
+    box: '<path d="m12 3 8 4.5v9L12 21l-8-4.5v-9L12 3z"/><path d="m4 7.5 8 4.5 8-4.5M12 12v9"/>',
     spark: '<path d="M12 3v4M12 17v4M3 12h4M17 12h4M5.6 5.6l2.8 2.8M15.6 15.6l2.8 2.8M18.4 5.6l-2.8 2.8M8.4 15.6l-2.8 2.8"/>',
   };
   const icon = (name, cls = "") => `<svg class="ico ${cls}" viewBox="0 0 24 24" aria-hidden="true" focusable="false">${P[name] || P.spark}</svg>`;
@@ -226,11 +260,13 @@
   const NAV = [
     ["home", ""],
     ["products", "products/"],
+    ["solutions", "solutions/"],
+    ["build", "build/"],
     ["services", "services/"],
-    ["work", "work/"],
     ["about", "about/"],
     ["contact", "contact/"],
   ];
+  const FOOTER_NAV = [...NAV, ["work", "work/"]];
   const tiktokLink = (cls) =>
     CFG.TIKTOK_URL
       ? `<a class="${cls}" href="${esc(CFG.TIKTOK_URL)}" target="_blank" rel="noopener noreferrer" aria-label="${ui("tiktok")}" title="${ui("tiktok")}">${icon("tiktok")}</a>`
@@ -274,7 +310,7 @@
           <p>${ui("footerAbout")}</p>
           <div class="footer__social">${tiktokLink("icon-link")}<a class="icon-link" data-wa="general" href="#" aria-label="${ui("whatsapp")}">${icon("whatsapp")}</a><a class="icon-link" href="mailto:${esc(CFG.EMAIL)}" aria-label="${ui("email")}">${icon("mail")}</a></div>
         </div>
-        <div class="footer__col"><h3>${ui("footerSite")}</h3><ul>${NAV.map(([k, href]) => `<li><a href="${ROOT}${href || (ROOT ? "" : "./")}">${ui(k)}</a></li>`).join("")}</ul></div>
+        <div class="footer__col"><h3>${ui("footerSite")}</h3><ul>${FOOTER_NAV.map(([k, href]) => `<li><a href="${ROOT}${href || (ROOT ? "" : "./")}">${ui(k)}</a></li>`).join("")}</ul></div>
         <div class="footer__col"><h3>${ui("footerServices")}</h3><ul>${DATA.services.map((s) => `<li><a href="${ROOT}services/#${s.id}">${esc(t(s.title))}</a></li>`).join("")}</ul></div>
         <div class="footer__col"><h3>${ui("footerContact")}</h3><ul>
           <li><a data-wa="general" href="#"><span dir="ltr">${phoneDisplay()}</span></a></li>
@@ -341,11 +377,19 @@
      ========================================================= */
   const STATUS_KEY = { ready: "prodReady", demo: "prodDemo", dev: "prodDev" };
   const statusBadge = (p) => `<span class="pstatus pstatus--${esc(p.status)}">${ui(STATUS_KEY[p.status] || "prodDev")}</span>`;
+  const runtimeBadge = (p) => `<span class="pruntime">${icon(p.runtime === "server" ? "server" : "globe")}${ui(p.runtime === "server" ? "runtimeServer" : "runtimeBrowser")}</span>`;
   const productPlaceholder = (p) => `<div class="pplaceholder" role="img" aria-label="${esc(p.name)} — ${ui("previewSoon")}">
       ${mark("ph")}<b dir="ltr">${esc(p.name)}</b><small>${ui("previewSoon")}</small></div>`;
   const productVisual = (p) => (p.image ? `<img src="${ROOT}${esc(p.image)}" alt="${esc(p.name)} — ${esc(t(p.tagline))}" loading="lazy" width="800" height="500">` : productPlaceholder(p));
   const priceHTML = () => `<span class="price price--ask">${ui("priceOnRequest")}</span>`;
-  const demoBtn = (p, cls = "btn--sm") => (p.demoUrl ? `<a class="btn btn--ghost ${cls}" href="${ROOT}${esc(p.demoUrl)}">${icon("external")}${ui("watchDemo")}</a>` : "");
+  // Demo button: a live demo link, a WhatsApp demo request for server systems, or nothing.
+  const demoBtn = (p, cls = "btn--sm") => {
+    const d = p.demo || {};
+    if (d.type === "live" && d.url) return `<a class="btn btn--ghost ${cls}" href="${ROOT}${esc(d.url)}">${icon("external")}${ui(p.status === "ready" ? "tryNow" : "tryDemo")}</a>`;
+    if (d.type === "request") return `<a class="btn btn--ghost ${cls}" data-wa="demo:${p.id}" href="#">${icon("whatsapp")}${ui("requestDemo")}</a>`;
+    return "";
+  };
+  const quoteBtn = (p, cls = "btn--sm") => `<a class="btn btn--gold ${cls}" data-wa="quote:${p.id}" href="#">${icon("whatsapp")}${ui("requestQuote")}</a>`;
 
   /* =========================================================
      Renderers ([data-render] containers)
@@ -353,15 +397,19 @@
   const renderServices = (el) => {
     const limit = Number(el.dataset.limit) || DATA.services.length;
     const full = el.dataset.variant === "full";
-    el.innerHTML = DATA.services.slice(0, limit).map((s, i) => `
+    el.innerHTML = DATA.services.slice(0, limit).map((s, i) => {
+      const related = (s.related || []).map(findProduct).filter(Boolean);
+      return `
       <article class="service reveal" id="${full ? s.id : `svc-${s.id}`}" style="--d:${i}">
-        <span class="service__num" aria-hidden="true">0${i + 1}</span>
+        <span class="service__num" aria-hidden="true">${String(i + 1).padStart(2, "0")}</span>
         <span class="service__icon">${icon(s.icon)}</span>
         <h3>${esc(t(s.title))}</h3>
         <p>${esc(t(s.desc))}</p>
         ${full ? `<ul class="ticks">${t(s.points).map((x) => `<li>${icon("check")}${esc(x)}</li>`).join("")}</ul>` : ""}
+        ${full && related.length ? `<p class="service__rel"><span>${ui("relatedSystems")}:</span> ${related.map((p) => `<a href="${ROOT}products/#${p.id}" dir="ltr">${esc(p.name)}</a>`).join(" · ")}</p>` : ""}
         <a class="link-wa" data-wa="service:${s.id}" href="#">${icon("whatsapp")}<span>${ui("requestService")}</span>${icon("arrow", "flip")}</a>
-      </article>`).join("");
+      </article>`;
+    }).join("");
   };
 
   const renderProducts = (el) => {
@@ -369,19 +417,20 @@
     const full = el.dataset.variant === "full";
     el.innerHTML = DATA.products.slice(0, limit).map((p, i) => `
       <article class="product reveal" id="${full ? p.id : `prd-${p.id}`}" style="--d:${i}">
-        <button type="button" class="product__media" data-product="${p.id}" aria-label="${ui("details")}: ${esc(p.name)}">${productVisual(p)}${statusBadge(p)}</button>
+        <button type="button" class="product__media" data-product="${p.id}" aria-label="${ui("explore")}: ${esc(p.name)}">${productVisual(p)}${statusBadge(p)}</button>
         <div class="product__body">
-          <span class="product__tag">${esc(t(p.tagline))}</span>
+          <span class="product__tag">${esc(t(p.tagline))} ${runtimeBadge(p)}</span>
           <h3 dir="ltr">${esc(p.name)}</h3>
           <p>${esc(t(p.summary))}</p>
+          <p class="product__problem"><b>${ui("problemLabel")}:</b> ${esc(t(p.problem))}</p>
           <ul class="ticks ticks--sm">${t(p.features).slice(0, full ? 6 : 3).map((x) => `<li>${icon("check")}${esc(x)}</li>`).join("")}</ul>
           <div class="product__foot">
             ${priceHTML()}
-            <button type="button" class="link-more" data-product="${p.id}">${ui("details")}</button>
+            <button type="button" class="link-more" data-product="${p.id}">${ui("explore")}</button>
           </div>
           <div class="product__actions">
             ${demoBtn(p)}
-            <a class="btn btn--gold btn--sm" data-wa="product:${p.id}" href="#">${icon("whatsapp")}${ui("orderNow")}</a>
+            ${quoteBtn(p)}
           </div>
         </div>
       </article>`).join("");
@@ -420,7 +469,146 @@
     el.innerHTML = `${filters}<div class="work-grid">${cards}</div>`;
   };
 
-  const RENDERERS = { services: renderServices, products: renderProducts, work: renderWork };
+  /* =========================================================
+     Solution finder — fixed rules applied to the visitor's answers
+     (no AI, nothing sent anywhere until the visitor chooses WhatsApp)
+     ========================================================= */
+  const F = {
+    title: { ar: "أجب عن 6 أسئلة قصيرة", en: "Answer 6 short questions" },
+    submit: { ar: "اعرض الحل المقترح", en: "Show the suggested solution" },
+    reset: { ar: "ابدأ من جديد", en: "Start again" },
+    required: { ar: "يرجى الإجابة عن هذا السؤال", en: "Please answer this question" },
+    resultTitle: { ar: "الحل المقترح لك", en: "Your suggested solution" },
+    systems: { ar: "الأنظمة المناسبة", en: "Matching systems" },
+    services: { ar: "خدمات قد تحتاجها", en: "Services you may need" },
+    features: { ar: "مزايا مقترحة", en: "Suggested features" },
+    steps: { ar: "خطوات التنفيذ", en: "Implementation steps" },
+    quote: { ar: "اطلب عرض سعر لهذا الحل", en: "Request a quote for this solution" },
+    build: { ar: "ابدأ طلب نظام مخصص", en: "Start a custom system request" },
+    disclaimer: {
+      ar: "توصية أولية مبنية على قواعد ثابتة وعلى إجاباتك فقط — ليست ذكاءً اصطناعيًا. يؤكدها فريق AZENK بعد التواصل معك.",
+      en: "An initial recommendation based on fixed rules and your answers only — not AI. The AZENK team confirms it after talking to you.",
+    },
+    types: {
+      ready: { ar: "نظام جاهز من AZENK مع تخصيص لمنشأتك", en: "A ready AZENK system tailored to your organisation" },
+      custom: { ar: "نظام مخصص يُبنى حول طريقة عملك", en: "A custom system built around how you work" },
+      improve: { ar: "تطوير أنظمتك الحالية وربطها ببعضها", en: "Improve and connect your current systems" },
+      advice: { ar: "جلسة استشارية وخطة تحول رقمي على مراحل", en: "An advisory session and a phased digital plan" },
+      student: { ar: "أدوات وخدمات للطلاب والأفراد", en: "Tools and services for students and individuals" },
+    },
+    stepsBy: {
+      ready: { ar: ["جلسة Demo على النظام المقترح", "تحديد التخصيصات والصلاحيات المطلوبة", "تهيئة الحسابات ونقل البيانات الحالية", "تدريب المستخدمين والتشغيل والدعم"], en: ["A demo session of the suggested system", "Agreeing customisations and permissions", "Setting up accounts and migrating current data", "User training, launch and support"] },
+      custom: { ar: ["تحليل المتطلبات ونطاق العمل", "تصميم تجربة الاستخدام والواجهات", "التطوير والاختبار على مراحل", "الإطلاق والدعم بعد التسليم"], en: ["Requirements and scope analysis", "UX and interface design", "Phased development and testing", "Launch and post-delivery support"] },
+      improve: { ar: ["مراجعة الأنظمة الحالية وبياناتها", "تصميم الربط أو التطوير المطلوب", "التنفيذ والاختبار دون إيقاف العمل", "التشغيل والمتابعة"], en: ["Reviewing current systems and data", "Designing the integration or improvement", "Implementation and testing without stopping work", "Go-live and monitoring"] },
+      advice: { ar: ["جلسة لفهم إجراءاتك الحالية", "تحديد الأولويات وخطة مراحل", "اختيار الحل: جاهز أو مخصص", "تنفيذ تدريجي وقياس النتائج"], en: ["A session to understand your current procedures", "Priorities and a phased plan", "Choosing ready or custom solutions", "Gradual implementation and measuring results"] },
+      student: { ar: ["تحديد ما تحتاجه: أداة أو خدمة", "تجربة الأداة المناسبة مباشرة", "طلب الخدمة عند الحاجة لمساعدة", "مراجعة وتسليم"], en: ["Decide what you need: a tool or a service", "Try the matching tool right away", "Request the service if you need help", "Review and delivery"] },
+    },
+    extraFeatures: {
+      manual: { ar: "نماذج رقمية ومسارات موافقة بدل الورق", en: "Digital forms and approval flows instead of paper" },
+      integration: { ar: "ربط الأنظمة عبر واجهات API وتبادل البيانات", en: "System integration through APIs and data exchange" },
+      website: { ar: "موقع أو متجر متجاوب ثنائي اللغة", en: "A responsive bilingual website or store" },
+    },
+    scale: { ar: "لعدد المستخدمين الكبير يُنصح بتشغيل النظام على خادم مخصص، والبدء بمرحلة تجريبية على قسم واحد قبل التعميم.", en: "For many users we recommend a dedicated server and a pilot in one department before rolling out." },
+  };
+  const ft = (k) => t(F[k]);
+
+  const renderFinder = (el) => {
+    const Q = (DATA.finder && DATA.finder.questions) || [];
+    el.innerHTML = `
+      <form class="finder reveal" data-finder novalidate>
+        <h2 class="finder__title">${ft("title")}</h2>
+        ${Q.map((q, qi) => `
+          <fieldset class="finder__q" data-q="${q.id}">
+            <legend><span class="finder__n">${qi + 1}</span>${esc(t(q.label))}</legend>
+            <div class="finder__opts">${q.options.map(([v, l]) => `
+              <label class="opt-chip"><input type="${q.type === "multi" ? "checkbox" : "radio"}" name="${q.id}" value="${v}"><span>${esc(t(l))}</span></label>`).join("")}</div>
+            <small class="field__error" aria-live="polite"></small>
+          </fieldset>`).join("")}
+        <div class="finder__actions"><button type="submit" class="btn btn--gold btn--lg">${icon("target")}${ft("submit")}</button><button type="reset" class="btn btn--ghost">${ft("reset")}</button></div>
+      </form>
+      <div class="finder-result" data-finder-result hidden tabindex="-1"></div>`;
+  };
+
+  const finderCompute = (a) => {
+    const R = DATA.finder;
+    const score = {};
+    const add = (ids, n) => (ids || []).forEach((id) => (score[id] = (score[id] || 0) + n));
+    a.problems.forEach((pr) => add(R.problemSystems[pr], 3));
+    add(R.activitySystems[a.activity], 2);
+    const systems = Object.entries(score).sort((x, y) => y[1] - x[1]).map(([id]) => findProduct(id)).filter(Boolean).slice(0, 3);
+    const services = [...new Set(a.problems.flatMap((pr) => R.problemServices[pr] || []))].map(findService).filter(Boolean);
+    let type;
+    if (a.need === "advice") type = "advice";
+    else if (a.need === "improve" || a.problems.includes("integration") || a.current === "legacy" || a.current === "many") type = "improve";
+    else if (a.need === "custom" || !systems.length) type = "custom";
+    else if (a.activity === "student" || a.size === "solo") type = "student";
+    else type = "ready";
+    if (type === "custom" && !services.some((x) => x.id === "software")) services.unshift(findService("software"));
+    if (type === "improve" && !services.some((x) => x.id === "integration")) services.unshift(findService("integration"));
+    if (type === "advice" && !services.some((x) => x.id === "transformation")) services.unshift(findService("transformation"));
+    if ((type === "ready" || type === "improve") && systems.length && !services.some((x) => x.id === "business")) services.push(findService("business"));
+    const features = [...new Set([...(systems[0] ? t(systems[0].features).slice(0, 4) : []), ...a.problems.map((pr) => F.extraFeatures[pr] && t(F.extraFeatures[pr])).filter(Boolean)])];
+    const large = a.users === "100+" || a.size === "large";
+    return { type, systems, services: services.filter(Boolean).slice(0, 4), features, large };
+  };
+
+  const answerLabel = (qid, v) => {
+    const q = DATA.finder.questions.find((x) => x.id === qid);
+    const o = q && q.options.find(([k]) => k === v);
+    return o ? t(o[1]) : v;
+  };
+
+  const initFinder = (form) => {
+    const out = form.parentNode.querySelector("[data-finder-result]");
+    const Q = DATA.finder.questions;
+    form.addEventListener("change", (e) => { const fs = e.target.closest(".finder__q"); if (fs) { fs.classList.remove("is-invalid"); fs.querySelector(".field__error").textContent = ""; } });
+    form.addEventListener("reset", () => { out.hidden = true; out.innerHTML = ""; form.querySelectorAll(".finder__q").forEach((fs) => fs.classList.remove("is-invalid")); });
+    form.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const fd = new FormData(form);
+      const a = {};
+      let firstBad = null;
+      Q.forEach((q) => {
+        const vals = fd.getAll(q.id);
+        a[q.id] = q.type === "multi" ? vals : vals[0];
+        const fs = form.querySelector(`[data-q="${q.id}"]`);
+        const bad = !vals.length;
+        fs.classList.toggle("is-invalid", bad);
+        fs.querySelector(".field__error").textContent = bad ? ft("required") : "";
+        if (bad && !firstBad) firstBad = fs;
+      });
+      if (firstBad) { const i = firstBad.querySelector("input"); if (i) i.focus(); return; }
+      const r = finderCompute(a);
+      const shortLabel = (q) => t(q.label).replace(/\s*\(.*\)\s*$/, "").replace(/[؟?]\s*$/, "");
+      const summary = Q.map((q) => `• ${shortLabel(q)}: ${q.type === "multi" ? a[q.id].map((v) => answerLabel(q.id, v)).join(lang === "ar" ? "، " : ", ") : answerLabel(q.id, a[q.id])}`);
+      const msg = (lang === "ar"
+        ? ["السلام عليكم، استخدمت أداة «دع AZENK تحدد الحل المناسب» وأرغب في عرض سعر.", "", `الحل المقترح: ${t(F.types[r.type])}`, r.systems.length ? `الأنظمة: ${r.systems.map((p) => p.name).join("، ")}` : "", "", "إجاباتي:", ...summary, "", "الاسم:", "ملاحظات:"]
+        : ["Hello, I used the AZENK solution finder and would like a quote.", "", `Suggested solution: ${t(F.types[r.type])}`, r.systems.length ? `Systems: ${r.systems.map((p) => p.name).join(", ")}` : "", "", "My answers:", ...summary, "", "Name:", "Notes:"]).filter((x, i, arr) => x !== "" || arr[i - 1] !== "").join("\n");
+      const href = waHref(msg);
+      out.innerHTML = `
+        <div class="result">
+          <span class="eyebrow">${ft("resultTitle")}</span>
+          <h2>${esc(t(F.types[r.type]))}</h2>
+          ${r.large ? `<p class="result__note">${icon("info")}${esc(t(F.scale))}</p>` : ""}
+          <div class="result__grid">
+            ${r.systems.length ? `<section><h3>${ft("systems")}</h3><ul class="result__systems">${r.systems.map((p) => `<li><a href="${ROOT}products/#${p.id}"><img src="${ROOT}${esc(p.image)}" alt="" width="160" height="100" loading="lazy"><span><b dir="ltr">${esc(p.name)}</b><small>${esc(t(p.tagline))}</small></span></a></li>`).join("")}</ul></section>` : ""}
+            ${r.services.length ? `<section><h3>${ft("services")}</h3><ul class="ticks">${r.services.map((x) => `<li>${icon("check")}<a href="${ROOT}services/#${x.id}">${esc(t(x.title))}</a></li>`).join("")}</ul></section>` : ""}
+            ${r.features.length ? `<section><h3>${ft("features")}</h3><ul class="ticks">${r.features.map((x) => `<li>${icon("check")}${esc(x)}</li>`).join("")}</ul></section>` : ""}
+            <section><h3>${ft("steps")}</h3><ol class="result__steps">${t(F.stepsBy[r.type]).map((x) => `<li>${esc(x)}</li>`).join("")}</ol></section>
+          </div>
+          <div class="result__actions">
+            ${href ? `<a class="btn btn--gold btn--lg" href="${href}" target="_blank" rel="noopener noreferrer">${icon("whatsapp")}${ft("quote")}</a>` : `<span class="form__note">${ui("noNumber")}</span>`}
+            ${r.type === "custom" || r.type === "improve" ? `<a class="btn btn--ghost btn--lg" href="${ROOT}build/">${ft("build")}</a>` : ""}
+          </div>
+          <p class="result__disclaimer">${esc(ft("disclaimer"))}</p>
+        </div>`;
+      out.hidden = false;
+      out.focus({ preventScroll: true });
+      out.scrollIntoView({ behavior: reduce ? "auto" : "smooth", block: "start" });
+    });
+  };
+
+  const RENDERERS = { services: renderServices, products: renderProducts, work: renderWork, finder: renderFinder };
   const renderAll = () => {
     document.querySelectorAll("[data-render]").forEach((el) => {
       const fn = RENDERERS[el.dataset.render];
@@ -457,16 +645,19 @@
         <button type="button" class="pmodal__close" data-pclose aria-label="${ui("close")}">${icon("close")}</button>
         <div class="pmodal__media">${productVisual(p)}</div>
         <div class="pmodal__body">
-          <span class="product__tag">${esc(t(p.tagline))} · ${statusBadge(p)}</span>
+          <span class="product__tag">${esc(t(p.tagline))} · ${statusBadge(p)} ${runtimeBadge(p)}</span>
           <h2 id="pmTitle" dir="ltr">${esc(p.name)}</h2>
+          <p class="product__problem"><b>${ui("problemLabel")}:</b> ${esc(t(p.problem))}</p>
           <p class="pmodal__desc">${esc(t(p.description))}</p>
           <h3>${ui("features")}</h3>
           <ul class="ticks">${t(p.features).map((x) => `<li>${icon("check")}${esc(x)}</li>`).join("")}</ul>
+          <p class="pmodal__note">${icon("info")}${ui(p.runtime === "server" ? "runtimeServerNote" : "runtimeBrowserNote")}</p>
           <div class="pmodal__foot">
             ${priceHTML()}
             <div class="product__actions">
-              ${demoBtn(p)}
-              <a class="btn btn--gold" data-wa="product:${p.id}" href="#">${icon("whatsapp")}${ui("orderNow")}</a>
+              ${demoBtn(p, "")}
+              <a class="btn btn--ghost" data-wa="product:${p.id}" href="#">${icon("whatsapp")}${ui("details")}</a>
+              ${quoteBtn(p, "")}
             </div>
           </div>
         </div>
@@ -503,7 +694,7 @@
       }
     }
   });
-  // Deep link: products/#easy-fleet opens that product
+  // Deep link: products/#azenk-hr opens that system
   const openFromHash = () => {
     const id = decodeURIComponent(location.hash.slice(1));
     if (PAGE === "products" && findProduct(id)) openProduct(id);
@@ -516,7 +707,8 @@
     const current = sel.value;
     sel.innerHTML = `<option value="">${ui("choose")}</option>${DATA.services.map((s) => `<option value="${s.id}">${esc(t(s.title))}</option>`).join("")}
       <option value="product">${ui("optReady")}</option><option value="custom">${ui("optCustom")}</option><option value="other">${ui("optOther")}</option>`;
-    const pre = current || new URLSearchParams(location.search).get("service");
+    const qs = new URLSearchParams(location.search);
+    const pre = current || qs.get("service") || qs.get("type");
     if (pre) sel.value = pre;
   };
   const optionLabel = (v) => {
@@ -524,12 +716,39 @@
     if (s) return t(s.title);
     return { product: ui("optReady"), custom: ui("optCustom"), other: ui("optOther") }[v] || v;
   };
+  const FORM_TXT = {
+    build: {
+      ar: { head: "طلب بناء نظام من موقع AZENK", name: "الاسم", business: "النشاط / الجهة", phone: "الجوال", email: "البريد", service: "نوع المشروع", budget: "الميزانية التقريبية", details: "وصف المشروع", attach: "المرفقات: سأرسلها في هذه المحادثة إن وجدت." },
+      en: { head: "Build-a-system request from the AZENK website", name: "Name", business: "Business / organisation", phone: "Mobile", email: "Email", service: "Project type", budget: "Approximate budget", details: "Project description", attach: "Attachments: I will send them in this chat if any." },
+    },
+    project: {
+      ar: { head: "طلب مشروع جديد من موقع AZENK", name: "الاسم", phone: "الجوال", email: "البريد", service: "الخدمة", details: "تفاصيل المشروع" },
+      en: { head: "New project request from the AZENK website", name: "Name", phone: "Mobile", email: "Email", service: "Service", details: "Project details" },
+    },
+  };
+  const requestText = (form) => {
+    const kind = form.dataset.form === "build" ? "build" : "project";
+    const L = FORM_TXT[kind][lang];
+    const d = Object.fromEntries(new FormData(form));
+    const v = (k) => String(d[k] || "").trim();
+    const budgetSel = form.querySelector('[name="budget"]');
+    const budget = budgetSel && budgetSel.value ? budgetSel.options[budgetSel.selectedIndex].text : "—";
+    const lines = [L.head, "", `${L.name}: ${v("name")}`];
+    if (kind === "build") lines.push(`${L.business}: ${v("business")}`);
+    lines.push(`${L.phone}: ${v("phone")}`, `${L.email}: ${v("email") || "—"}`, `${L.service}: ${optionLabel(v("service"))}`);
+    if (kind === "build") lines.push(`${L.budget}: ${budget}`);
+    lines.push(`${L.details}: ${v("details")}`);
+    if (kind === "build") lines.push("", L.attach);
+    return { text: lines.join("\n"), subject: L.head };
+  };
+
   const initForm = (form) => {
     const sel = form.querySelector('[name="service"]');
     if (sel) fillServiceSelect(sel);
     const note = form.querySelector("[data-form-note]");
     const rules = {
       name: (v) => (v.length >= 2 ? "" : ui("errName")),
+      business: (v) => (v.length >= 2 ? "" : ui("errBusiness")),
       phone: (v) => (/^(\+?966|00966|0)?5\d{8}$/.test(v.replace(/[\s-]/g, "")) ? "" : ui("errPhone")),
       email: (v) => (!v || /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v) ? "" : ui("errEmail")),
       service: (v) => (v ? "" : ui("errService")),
@@ -545,37 +764,41 @@
       group.querySelector(".field__error").textContent = msg;
       return !msg;
     };
-    const fields = [...form.querySelectorAll("input, select, textarea")];
+    const fields = [...form.querySelectorAll("input, select, textarea")].filter((f) => f.name);
     fields.forEach((f) => f.addEventListener(f.tagName === "SELECT" ? "change" : "input", () => {
-      if (f.closest(".field").classList.contains("is-invalid")) check(f);
+      const g = f.closest(".field");
+      if (g && g.classList.contains("is-invalid")) check(f);
     }));
-    form.addEventListener("submit", (e) => {
-      e.preventDefault();
+    const validate = () => {
       note.textContent = "";
       const ok = fields.map(check);
-      if (ok.includes(false)) {
-        fields[ok.indexOf(false)].focus();
-        return;
-      }
-      const d = Object.fromEntries(new FormData(form));
-      const text = lang === "ar"
-        ? ["طلب مشروع جديد من موقع AZENK", "", `الاسم: ${d.name.trim()}`, `الجوال: ${d.phone.trim()}`, `البريد: ${d.email.trim() || "—"}`, `الخدمة: ${optionLabel(d.service)}`, `تفاصيل المشروع: ${d.details.trim()}`].join("\n")
-        : ["New project request from the AZENK website", "", `Name: ${d.name.trim()}`, `Mobile: ${d.phone.trim()}`, `Email: ${d.email.trim() || "—"}`, `Service: ${optionLabel(d.service)}`, `Project details: ${d.details.trim()}`].join("\n");
-      const href = waHref(text);
-      if (!href) {
-        note.textContent = ui("noNumber");
-        return;
-      }
+      if (ok.includes(false)) { fields[ok.indexOf(false)].focus(); return false; }
+      return true;
+    };
+    const open = (href) => {
       const a = document.createElement("a");
       a.href = href;
-      a.target = "_blank";
-      a.rel = "noopener noreferrer";
+      if (href.startsWith("https:")) { a.target = "_blank"; a.rel = "noopener noreferrer"; }
       document.body.appendChild(a);
       a.click();
       a.remove();
+    };
+    form.addEventListener("submit", (e) => {
+      e.preventDefault();
+      if (!validate()) return;
+      const href = waHref(requestText(form).text);
+      if (!href) { note.textContent = ui("noNumber"); return; }
+      open(href);
       note.textContent = ui("formSent");
       form.reset();
       if (sel) sel.value = "";
+    });
+    const mail = form.querySelector("[data-mailto]");
+    if (mail) mail.addEventListener("click", () => {
+      if (!validate()) return;
+      const { text, subject } = requestText(form);
+      open(`mailto:${CFG.EMAIL}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(text)}`);
+      note.textContent = ui("mailSent");
     });
   };
 
@@ -608,6 +831,7 @@
     renderFooter();
     renderFloat();
     renderAll();
+    document.querySelectorAll("[data-finder]").forEach(initFinder);
     translateStatic();
     fillIcons();
     applyWaLinks();

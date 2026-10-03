@@ -13,13 +13,25 @@
     <priority>0.9</priority>
   </url>
   <url>
+    <loc>https://azenk.sa/solutions/</loc>
+    <lastmod>2026-10-03</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://azenk.sa/build/</loc>
+    <lastmod>2026-10-03</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
     <loc>https://azenk.sa/services/</loc>
     <lastmod>2026-10-03</lastmod>
     <changefreq>monthly</changefreq>
-    <priority>0.9</priority>
+    <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://azenk.sa/work/</loc>
+    <loc>https://azenk.sa/presentations/</loc>
     <lastmod>2026-10-03</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
@@ -27,13 +39,19 @@
   <url>
     <loc>https://azenk.sa/about/</loc>
     <lastmod>2026-10-03</lastmod>
-    <changefreq>yearly</changefreq>
+    <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://azenk.sa/contact/</loc>
     <lastmod>2026-10-03</lastmod>
-    <changefreq>yearly</changefreq>
-    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://azenk.sa/work/</loc>
+    <lastmod>2026-10-03</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
   </url>
 </urlset>

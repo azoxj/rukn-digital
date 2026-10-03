@@ -61,3 +61,25 @@ Date: 2026-10-03 · Branch: `claude/rukn-digital-portfolio-xrel59` · Scope: who
 9. Tests, security review, mobile (320–1440), SEO.
 
 Nothing is pushed, merged or deployed without explicit approval.
+
+---
+
+## Implementation status (development environment only)
+
+| Item | Status | Verified by |
+|---|---|---|
+| Platform IA: header (7 links + «اطلب حلًا»), hero, 4 paths, systems, finder, services, process | Done | `tests/site.e2e.js` (265 checks incl. 320–1440 px, AR/EN) |
+| الحلول — rule-based solution finder (labelled "not AI") | Done | site E2E |
+| ابنِ نظامك — 8 stages + request form → WhatsApp / e-mail (no fake backend) | Done | site E2E |
+| Easy Fleet removed from site, data, SEO, sitemap | Done (other branch untouched) | site E2E text scan |
+| Easy HR → AZENK HR (texts, title, canonical; data key unchanged) | Done | 28-view crawl, no errors |
+| FleetPro / ClinicFlow brand links fixed | Done | view crawl |
+| AZENK Presentations with real .pptx export | Done | 27 UI checks + python-pptx file check |
+| AZENK Call Center (server, SQLite, RBAC, tenants) | MVP done | 33 API tests (+ core) + 23 UI E2E |
+| AZENK Graduation (server, uploads, reviews, rubric) | MVP done | 15 API tests + UI E2E |
+| Product gap analysis | Done | `docs/PRODUCT-GAP-ANALYSIS.md` |
+
+Not done / needs your decision:
+- Hosting for Call Center and Graduation (they cannot run on GitHub Pages). Until then the site offers «اطلب Demo» for them, shown live on request.
+- AZENK HR, FleetPro and ClinicFlow remain browser demos (labelled as such); server editions are planned in the gap analysis.
+- Nothing pushed, merged or deployed.

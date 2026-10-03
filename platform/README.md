@@ -1,0 +1,88 @@
+# AZENK platform — server products
+
+Two full-stack products built on one shared core:
+
+| Product | Roles | Default port |
+|---|---|---|
+| **AZENK Call Center** (`apps/callcenter`) | SUPER_ADMIN, ADMIN, SUPERVISOR, AGENT | 4100 |
+| **AZENK Graduation** (`apps/graduation`) | ADMIN, SUPERVISOR, STUDENT | 4200 |
+
+No third-party runtime dependencies: Node.js built-ins (`node:http`, `node:crypto`,
+`node:sqlite`) only. Requires **Node.js 22.13+**.
+
+```
+platform/
+  core/              shared server + UI kit
+    db.js            SQLite (node:sqlite), migrations runner, transactions
+    http.js          router, body limits, security headers, CSRF/origin checks, static files
+    auth.js          sessions, login/logout/me/password, login rate limits, RBAC check
+    common-routes.js users, organisations, notifications, audit log
+    validate.js      request validation (Arabic field messages)
+    security.js      scrypt hashing, tokens, rate limiter
+    migrations/      core schema (organisations, users, sessions, notifications, audit_log)
+    public/          ui.js + ui.css (API client, shell, router, forms, tables, charts)
+  apps/<app>/        app.js (permissions + routes), migrations/, public/, seed.js, server.js
+  scripts/           bootstrap, seed-demo, check
+  tests/             node:test API tests (53)
+```
+
+## Run locally
+
+```bash
+cd platform
+npm test                                   # 53 API tests (in-memory DBs)
+
+# Try it with fictional demo data (refuses to touch a non-empty DB):
+DEMO_PASSWORD='Choose-a-pass-2026' npm run seed:demo -- --app callcenter
+npm run callcenter                         # http://127.0.0.1:4100
+
+DEMO_PASSWORD='Choose-a-pass-2026' npm run seed:demo -- --app graduation
+npm run graduation                         # http://127.0.0.1:4200
+```
+
+Demo accounts use `example.com` e-mails (e.g. `admin@example.com`, `supervisor@example.com`,
+`agent1@example.com` / `student1@example.com`). Without `DEMO_PASSWORD` a random password is
+generated and printed once.
+
+## Start a real installation
+
+```bash
+npm run bootstrap -- --app callcenter --org "Company name" --slug company --name "Admin name" --email admin@company.sa
+```
+
+Creates the first organisation and its top-level account (SUPER_ADMIN for Call Center, ADMIN
+for Graduation) on an empty database and prints a one-time temporary password that must be
+changed at first sign-in. Every other account is created inside the app; new users get a
+temporary password shown once to the admin.
+
+Configuration is through environment variables only — see `.env.example`. Never commit `.env`
+or database files (`data/` is git-ignored).
+
+## Security model
+
+- Passwords: scrypt (N=2^15, per-hash salt and parameters), policy 10+ chars with letters and digits.
+- Sessions: random 256-bit token in an `HttpOnly; SameSite=Strict` cookie (`Secure` when
+  `COOKIE_SECURE=1`); only its SHA-256 is stored. 12 h idle / 7 day absolute expiry; sessions are
+  revoked on password change, role change and deactivation.
+- CSRF: per-session token required in `X-CSRF-Token` for every mutation, plus same-origin check
+  and JSON-only bodies.
+- Rate limits: 5 failed logins per account+IP / 15 min, 30 per IP, 600 API requests/min per IP
+  (in-memory — use a shared store if you run several instances).
+- RBAC on every route; tenant isolation: every query is scoped by the user's `org_id`, and
+  records of other organisations answer 404.
+- Audit log: append-only (SQLite triggers block UPDATE/DELETE).
+- Uploads (Graduation): extension allow-list + magic-byte check, 15 MB limit, stored under random
+  keys outside the web root, served only through an authorised download route as attachments.
+- Headers: strict CSP (no inline scripts/styles), `X-Frame-Options: DENY`, `nosniff`,
+  `Referrer-Policy: no-referrer`, HSTS when `COOKIE_SECURE=1`.
+- CSV exports neutralise spreadsheet formulas.
+
+## Honest scope (what is NOT included)
+
+- Call Center: calls are **logged** by agents (with an in-app timer). There is no telephony/VoIP,
+  call recording, WhatsApp, SMS, CRM or AI integration. The `calls.provider`, `provider_ref` and
+  `recording_url` columns are reserved for a future integration and stay empty.
+- E-mail delivery is not implemented: notifications are in-app.
+- Hosting is not configured. These apps need a Node.js host with persistent disk (they cannot run
+  on GitHub Pages). Put them behind HTTPS (reverse proxy) with `COOKIE_SECURE=1` and
+  `TRUST_PROXY=1`, and back up the `data/` directory.
