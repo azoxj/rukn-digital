@@ -22,6 +22,5 @@ window.AZENK_CONFIG = {
   EMAIL: "azozazo88z@gmail.com",
   TIKTOK_URL: "",
 
-  CURRENCY: { ar: "ريال", en: "SAR" },
   DEFAULT_LANG: "ar",
 };

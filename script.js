@@ -72,7 +72,11 @@
     requestService: { ar: "اطلب الخدمة", en: "Request service" },
     priceOnRequest: { ar: "السعر عند الطلب", en: "Price on request" },
     features: { ar: "المزايا", en: "Features" },
-    liveDemo: { ar: "معاينة تجريبية", en: "Live demo" },
+    watchDemo: { ar: "شاهد Demo", en: "View demo" },
+    prodReady: { ar: "جاهز", en: "Ready" },
+    prodDemo: { ar: "Demo متاح", en: "Demo available" },
+    prodDev: { ar: "قيد التطوير", en: "In development" },
+    previewSoon: { ar: "المعاينة متاحة عند الإطلاق", en: "Preview available at launch" },
     preview: { ar: "معاينة", en: "Preview" },
     similar: { ar: "اطلب مشروعًا مشابهًا", en: "Request a similar project" },
     all: { ar: "الكل", en: "All" },
@@ -119,7 +123,6 @@
   const findProduct = (id) => DATA.products.find((p) => p.id === id);
   const findService = (id) => DATA.services.find((s) => s.id === id);
   const findWork = (id) => DATA.work.find((w) => w.id === id);
-  const currency = () => t(CFG.CURRENCY) || (lang === "ar" ? "ريال" : "SAR");
 
   // Message for each data-wa key ("start", "general", "service:web", "product:easy-fleet", ...)
   const waMessages = {
@@ -135,10 +138,10 @@
     product: (id) => {
       const p = findProduct(id);
       if (!p) return waMessages.general();
-      if (p.price != null) {
+      if (p.status === "dev") {
         return lang === "ar"
-          ? `السلام عليكم، أرغب في طلب ${p.name} بسعر ${p.price} ${currency()}. أود معرفة التفاصيل.`
-          : `Hello, I would like to order ${p.name} for ${p.price} ${currency()}. I would like to know the details.`;
+          ? `السلام عليكم، أرغب في طلب منتج ${p.name} من AZENK عند توفره. أود معرفة التفاصيل وموعد الإطلاق.`
+          : `Hello, I would like to order ${p.name} from AZENK when it becomes available. I would like to know the details and the launch date.`;
       }
       return lang === "ar"
         ? `السلام عليكم، أرغب في طلب منتج ${p.name} من AZENK. أود معرفة التفاصيل وطريقة الحصول عليه.`
@@ -191,7 +194,9 @@
     layers: '<path d="m12 3 9 5-9 5-9-5 9-5z"/><path d="m3 13 9 5 9-5M3 17.5l9 5 9-5" opacity=".6"/>',
     flow: '<rect x="3" y="3" width="6" height="6" rx="1.5"/><rect x="15" y="15" width="6" height="6" rx="1.5"/><path d="M6 9v3a3 3 0 0 0 3 3h6M15 6h3a3 3 0 0 1 3 3v0"/><circle cx="15" cy="6" r="1.2"/>',
     pen: '<path d="M12 19l7-7 2 2-7 7-2-2z"/><path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"/><path d="M2 2l7.6 7.6"/><circle cx="11" cy="11" r="2"/>',
-    interior: '<path d="M3 21V10l9-6 9 6v11"/><path d="M7 21v-6h10v6M7 15v-2a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v2"/>',
+    graduation: '<path d="m22 10-10-5-10 5 10 5 10-5Z"/><path d="M6 12v5c3 3 9 3 12 0v-5M22 10v6"/>',
+    slides: '<rect x="3" y="4" width="18" height="12" rx="1.5"/><path d="M12 16v4M8 20h8M7 12l3-3 2 2 4-4"/>',
+    headset: '<path d="M4 14v-2a8 8 0 0 1 16 0v2"/><rect x="2.5" y="14" width="4" height="6" rx="1.5"/><rect x="17.5" y="14" width="4" height="6" rx="1.5"/><path d="M19.5 20a3 3 0 0 1-3 2H13"/>',
     user: '<circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/>',
     building: '<rect x="4" y="3" width="16" height="18" rx="1.5"/><path d="M9 21v-4h6v4M8 7h2M14 7h2M8 11h2M14 11h2"/>',
     external: '<path d="M14 4h6v6M20 4l-9 9M19 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1h5"/>',
@@ -331,50 +336,16 @@
   });
 
   /* =========================================================
-     Product illustrations (lightweight inline SVG)
+     Product media: a real screenshot, or a neutral placeholder
+     (never a fake interface for a system that has no screenshot)
      ========================================================= */
-  const productArt = (kind) => {
-    const frame = (inner) => `<svg class="art" viewBox="0 0 400 250" role="img" aria-label="${ui("illustrative")}" preserveAspectRatio="xMidYMid slice">
-      <defs>
-        <linearGradient id="bg-${kind}" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#0f1b33"/><stop offset="1" stop-color="#070a12"/></linearGradient>
-        <linearGradient id="gd-${kind}" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#f1dfae"/><stop offset="1" stop-color="#b08a45"/></linearGradient>
-      </defs>
-      <rect width="400" height="250" fill="url(#bg-${kind})"/>
-      <circle cx="330" cy="40" r="120" fill="#c9a45c" opacity=".05"/>
-      <rect x="40" y="34" width="320" height="196" rx="12" fill="#0b1426" stroke="rgba(255,255,255,.1)"/>
-      <rect x="40" y="34" width="320" height="22" rx="12" fill="rgba(255,255,255,.04)"/>
-      <circle cx="56" cy="45" r="3" fill="#c9a45c"/><circle cx="66" cy="45" r="3" fill="rgba(255,255,255,.25)"/><circle cx="76" cy="45" r="3" fill="rgba(255,255,255,.25)"/>
-      ${inner}</svg>`;
-    const kpis = `<g fill="rgba(255,255,255,.05)" stroke="rgba(255,255,255,.08)"><rect x="56" y="68" width="88" height="34" rx="6"/><rect x="156" y="68" width="88" height="34" rx="6"/><rect x="256" y="68" width="88" height="34" rx="6"/></g>
-      <g fill="url(#gd-${kind})"><rect x="64" y="88" width="36" height="5" rx="2.5"/><rect x="164" y="88" width="48" height="5" rx="2.5"/><rect x="264" y="88" width="30" height="5" rx="2.5"/></g>`;
-    switch (kind) {
-      case "fleet":
-        return frame(`${kpis}
-          <rect x="56" y="114" width="288" height="102" rx="8" fill="rgba(255,255,255,.03)" stroke="rgba(255,255,255,.07)"/>
-          <path d="M70 200 C120 180 110 130 170 140 S250 120 330 128" fill="none" stroke="url(#gd-${kind})" stroke-width="2.5" stroke-dasharray="6 6"/>
-          <circle cx="70" cy="200" r="6" fill="#c9a45c"/><circle cx="170" cy="140" r="5" fill="#f5f3ee"/><circle cx="330" cy="128" r="6" fill="#c9a45c"/>
-          <rect x="230" y="160" width="96" height="40" rx="6" fill="#0f1b33" stroke="rgba(201,164,92,.4)"/><rect x="240" y="172" width="60" height="5" rx="2.5" fill="rgba(255,255,255,.4)"/><rect x="240" y="184" width="40" height="5" rx="2.5" fill="url(#gd-${kind})"/>`);
-      case "parking": {
-        let slots = "";
-        for (let r = 0; r < 2; r++) for (let c = 0; c < 7; c++) {
-          const x = 62 + c * 40;
-          const y = 120 + r * 50;
-          const busy = (r * 7 + c) % 3 !== 1;
-          slots += `<rect x="${x}" y="${y}" width="32" height="42" rx="5" fill="${busy ? "rgba(201,164,92,.18)" : "rgba(255,255,255,.03)"}" stroke="${busy ? "rgba(201,164,92,.55)" : "rgba(255,255,255,.12)"}"/>`;
-          if (busy) slots += `<rect x="${x + 8}" y="${y + 9}" width="16" height="24" rx="4" fill="url(#gd-${kind})" opacity=".85"/>`;
-        }
-        return frame(`${kpis}${slots}`);
-      }
-      case "store":
-        return frame(`<rect x="56" y="68" width="288" height="16" rx="5" fill="rgba(255,255,255,.05)"/>
-          ${[0, 1, 2].map((i) => `<g transform="translate(${56 + i * 98} 96)"><rect width="90" height="120" rx="8" fill="rgba(255,255,255,.04)" stroke="rgba(255,255,255,.08)"/><rect x="10" y="10" width="70" height="56" rx="6" fill="${i === 1 ? "url(#gd-store)" : "rgba(255,255,255,.08)"}" opacity="${i === 1 ? ".85" : "1"}"/><rect x="10" y="76" width="54" height="5" rx="2.5" fill="rgba(255,255,255,.4)"/><rect x="10" y="88" width="34" height="5" rx="2.5" fill="url(#gd-store)"/><rect x="10" y="100" width="70" height="12" rx="6" fill="rgba(255,255,255,.07)"/></g>`).join("")}`);
-      default:
-        return frame(`${kpis}
-          ${[0, 1, 2].map((c) => `<g transform="translate(${56 + c * 98} 114)"><rect width="90" height="102" rx="8" fill="rgba(255,255,255,.03)" stroke="rgba(255,255,255,.07)"/><rect x="10" y="10" width="40" height="5" rx="2.5" fill="url(#gd-biz)"/>${[0, 1, 2].slice(0, 3 - (c % 2)).map((r) => `<rect x="8" y="${24 + r * 24}" width="74" height="18" rx="4" fill="rgba(255,255,255,.06)"/>`).join("")}</g>`).join("")}`);
-    }
-  };
-  const productVisual = (p) => (p.image ? `<img src="${ROOT}${esc(p.image)}" alt="${esc(p.name)}" loading="lazy" width="400" height="250">` : productArt(p.art || "biz"));
-  const priceHTML = (p) => (p.price != null ? `<span class="price"><b>${p.price}</b><small>${currency()}</small></span>` : `<span class="price price--ask">${ui("priceOnRequest")}</span>`);
+  const STATUS_KEY = { ready: "prodReady", demo: "prodDemo", dev: "prodDev" };
+  const statusBadge = (p) => `<span class="pstatus pstatus--${esc(p.status)}">${ui(STATUS_KEY[p.status] || "prodDev")}</span>`;
+  const productPlaceholder = (p) => `<div class="pplaceholder" role="img" aria-label="${esc(p.name)} — ${ui("previewSoon")}">
+      ${mark("ph")}<b dir="ltr">${esc(p.name)}</b><small>${ui("previewSoon")}</small></div>`;
+  const productVisual = (p) => (p.image ? `<img src="${ROOT}${esc(p.image)}" alt="${esc(p.name)} — ${esc(t(p.tagline))}" loading="lazy" width="800" height="500">` : productPlaceholder(p));
+  const priceHTML = () => `<span class="price price--ask">${ui("priceOnRequest")}</span>`;
+  const demoBtn = (p, cls = "btn--sm") => (p.demoUrl ? `<a class="btn btn--ghost ${cls}" href="${ROOT}${esc(p.demoUrl)}">${icon("external")}${ui("watchDemo")}</a>` : "");
 
   /* =========================================================
      Renderers ([data-render] containers)
@@ -395,19 +366,22 @@
 
   const renderProducts = (el) => {
     const limit = Number(el.dataset.limit) || DATA.products.length;
+    const full = el.dataset.variant === "full";
     el.innerHTML = DATA.products.slice(0, limit).map((p, i) => `
-      <article class="product reveal" style="--d:${i}">
-        <button type="button" class="product__media" data-product="${p.id}" aria-label="${ui("details")}: ${esc(p.name)}">${productVisual(p)}</button>
+      <article class="product reveal" id="${full ? p.id : `prd-${p.id}`}" style="--d:${i}">
+        <button type="button" class="product__media" data-product="${p.id}" aria-label="${ui("details")}: ${esc(p.name)}">${productVisual(p)}${statusBadge(p)}</button>
         <div class="product__body">
           <span class="product__tag">${esc(t(p.tagline))}</span>
           <h3 dir="ltr">${esc(p.name)}</h3>
           <p>${esc(t(p.summary))}</p>
+          <ul class="ticks ticks--sm">${t(p.features).slice(0, full ? 6 : 3).map((x) => `<li>${icon("check")}${esc(x)}</li>`).join("")}</ul>
           <div class="product__foot">
-            ${priceHTML(p)}
-            <div class="product__actions">
-              <button type="button" class="btn btn--ghost btn--sm" data-product="${p.id}">${ui("details")}</button>
-              <a class="btn btn--gold btn--sm" data-wa="product:${p.id}" href="#">${icon("whatsapp")}${ui("orderNow")}</a>
-            </div>
+            ${priceHTML()}
+            <button type="button" class="link-more" data-product="${p.id}">${ui("details")}</button>
+          </div>
+          <div class="product__actions">
+            ${demoBtn(p)}
+            <a class="btn btn--gold btn--sm" data-wa="product:${p.id}" href="#">${icon("whatsapp")}${ui("orderNow")}</a>
           </div>
         </div>
       </article>`).join("");
@@ -483,15 +457,15 @@
         <button type="button" class="pmodal__close" data-pclose aria-label="${ui("close")}">${icon("close")}</button>
         <div class="pmodal__media">${productVisual(p)}</div>
         <div class="pmodal__body">
-          <span class="product__tag">${esc(t(p.tagline))}</span>
+          <span class="product__tag">${esc(t(p.tagline))} · ${statusBadge(p)}</span>
           <h2 id="pmTitle" dir="ltr">${esc(p.name)}</h2>
           <p class="pmodal__desc">${esc(t(p.description))}</p>
           <h3>${ui("features")}</h3>
           <ul class="ticks">${t(p.features).map((x) => `<li>${icon("check")}${esc(x)}</li>`).join("")}</ul>
           <div class="pmodal__foot">
-            ${priceHTML(p)}
+            ${priceHTML()}
             <div class="product__actions">
-              ${p.demoUrl ? `<a class="btn btn--ghost btn--sm" href="${ROOT}${esc(p.demoUrl)}">${icon("external")}${ui("liveDemo")}</a>` : ""}
+              ${demoBtn(p)}
               <a class="btn btn--gold" data-wa="product:${p.id}" href="#">${icon("whatsapp")}${ui("orderNow")}</a>
             </div>
           </div>
