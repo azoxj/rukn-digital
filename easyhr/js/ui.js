@@ -1,5 +1,5 @@
 /* =========================================================
-   Easy HR — UI kit (toasts, modals, forms, tables, charts,
+   AZENK HR — UI kit (toasts, modals, forms, tables, charts,
    kanban, calendar, steppers). Plain DOM, no dependencies.
    ========================================================= */
 (function (EHR) {

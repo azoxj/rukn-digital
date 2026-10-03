@@ -1,5 +1,5 @@
 /* =========================================================
-   Easy HR — shared helpers for modules (status maps, widgets)
+   AZENK HR — shared helpers for modules (status maps, widgets)
    ========================================================= */
 (function (EHR) {
   "use strict";

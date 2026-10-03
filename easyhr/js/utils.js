@@ -1,5 +1,5 @@
 /* =========================================================
-   Easy HR — utilities (no dependencies)
+   AZENK HR — utilities (no dependencies)
    ========================================================= */
 (function (EHR) {
   "use strict";
@@ -218,7 +218,7 @@
         .grid small{display:block;color:#667085;font-size:11px} .total{font-size:16px;font-weight:700}
         .sign{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;margin-top:48px}.sign div{border-top:1px solid #98a2b3;padding-top:6px;text-align:center}
         .demo{margin-top:24px;font-size:11px;color:#98a2b3;text-align:center}
-      </style></head><body>${html}<p class="demo">مستند تجريبي صادر من نسخة عرض Easy HR — البيانات وهمية.</p></body></html>`);
+      </style></head><body>${html}<p class="demo">مستند تجريبي صادر من نسخة عرض AZENK HR — البيانات وهمية.</p></body></html>`);
     doc.close();
     setTimeout(() => {
       try {

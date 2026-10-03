@@ -1,5 +1,5 @@
 /* =========================================================
-   Easy HR — reports & analytics, notifications center,
+   AZENK HR — reports & analytics, notifications center,
    unified calendar, help center
    ========================================================= */
 (function (EHR) {

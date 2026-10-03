@@ -1,5 +1,5 @@
 /* =========================================================
-   Easy HR — records & services: documents, assets (custody),
+   AZENK HR — records & services: documents, assets (custody),
    disciplinary, employee requests + approvals inbox, travel,
    transfers & promotions
    ========================================================= */
@@ -267,7 +267,7 @@
     const total = e.basicSalary + Math.round((e.basicSalary * s.housingPct) / 100) + (e.transportAllowance ?? s.transportAmount) + (e.otherAllowance || 0);
     return `<div class="head"><h1>${esc(r.type)}</h1><p>${esc(co.name)} — ${U.fmtLong(U.today())}</p></div>
       <p>إلى من يهمه الأمر،</p><p>تشهد ${esc(co.name)} بأن السيد/ة <b>${esc(e.nameAr)}</b> (${esc(e.nationality)}) يعمل لديها بوظيفة <b>${esc(L().titleName(e.jobTitleId))}</b> منذ ${U.fmtDate(e.joinDate)} وما زال على رأس العمل حتى تاريخه${salary ? `، ويتقاضى راتبًا شهريًا إجماليًا قدره <b>${U.money(total)}</b>` : ""}.</p>
-      <p>وقد أُعطي هذا الخطاب بناءً على طلبه دون أدنى مسؤولية على الشركة.</p><p class="muted">رقم المرجع: ${r.id} — مستند تجريبي صادر من Easy HR.</p><div class="sign"><span>مدير الموارد البشرية</span><span>الختم</span></div>`;
+      <p>وقد أُعطي هذا الخطاب بناءً على طلبه دون أدنى مسؤولية على الشركة.</p><p class="muted">رقم المرجع: ${r.id} — مستند تجريبي صادر من AZENK HR.</p><div class="sign"><span>مدير الموارد البشرية</span><span>الختم</span></div>`;
   };
   const requests = EHR.crud({
     key: "requests", title: "الطلبات", icon: "inbox", embedded: true, noCreateButton: true,

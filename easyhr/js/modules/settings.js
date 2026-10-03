@@ -1,5 +1,5 @@
 /* =========================================================
-   Easy HR — settings: company, roles & permissions, policies,
+   AZENK HR — settings: company, roles & permissions, policies,
    approval workflows, notifications, lists, privacy,
    integrations (future), system status & demo reset, audit log
    ========================================================= */
@@ -175,7 +175,7 @@
     const db = EHR.db;
     return `<div class="cards-grid">
       <section class="card"><header class="card__head"><h3>${icon("info")}حالة النظام</h3>${UI.badge("وضع تجريبي", "warning")}</header>
-        <div class="info-grid info-grid--1">${UI.info("الإصدار", "Easy HR — نسخة عرض 1.0")}${UI.info("مصدر البيانات", "بيانات تجريبية في المتصفح (localStorage)")}${UI.info("حجم البيانات المحلية", `${U.round(size / 1024, 1)} KB`)}${UI.info("تاريخ التوليد", U.fmtStamp(db.meta.seededAt))}${UI.info("الموظفون / السجلات", `${db.employees.length} / ${db.attendance.length} سجل حضور`)}</div></section>
+        <div class="info-grid info-grid--1">${UI.info("الإصدار", "AZENK HR — نسخة عرض 1.0")}${UI.info("مصدر البيانات", "بيانات تجريبية في المتصفح (localStorage)")}${UI.info("حجم البيانات المحلية", `${U.round(size / 1024, 1)} KB`)}${UI.info("تاريخ التوليد", U.fmtStamp(db.meta.seededAt))}${UI.info("الموظفون / السجلات", `${db.employees.length} / ${db.attendance.length} سجل حضور`)}</div></section>
       <section class="card"><header class="card__head"><h3>${icon("refresh")}البيانات التجريبية</h3></header>
         <p class="small">يعيد النظام إلى حالته الأصلية ويحذف كل ما أضفته أو عدّلته في هذا المتصفح.</p>
         <div class="btn-row"><button type="button" class="btn btn--danger" data-reset-demo>${icon("refresh")}إعادة ضبط البيانات التجريبية</button><button type="button" class="btn btn--ghost" data-export-json>${icon("download")}تصدير نسخة JSON</button></div></section>

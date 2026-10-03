@@ -1,5 +1,5 @@
 /* =========================================================
-   Easy HR — attendance & shifts
+   AZENK HR — attendance & shifts
    - Mobile check-in with the real Geolocation API or a clearly
      labelled simulated location (demo only)
    - Haversine geofence + rule checklist before every check-in

@@ -1,5 +1,5 @@
 /* =========================================================
-   Easy HR — leave: requests (approval workflow), balances,
+   AZENK HR — leave: requests (approval workflow), balances,
    team calendar, leave types & policy (all configurable)
    ========================================================= */
 (function (EHR) {

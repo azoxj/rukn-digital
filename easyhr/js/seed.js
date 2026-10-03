@@ -1,5 +1,5 @@
 /* =========================================================
-   Easy HR — demo data generator
+   AZENK HR — demo data generator
    Every person, number and address below is fictional. Dates are
    generated relative to "today" so the demo always looks current.
    ========================================================= */

@@ -1,5 +1,5 @@
 /* =========================================================
-   Easy HR — recruitment: job requests (with approval), ATS
+   AZENK HR — recruitment: job requests (with approval), ATS
    pipeline (kanban), candidate profile, interviews, offers, hiring
    ========================================================= */
 (function (EHR) {

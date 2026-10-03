@@ -1,5 +1,5 @@
 /* =========================================================
-   Easy HR — end of service: request & approval, notice,
+   AZENK HR — end of service: request & approval, notice,
    handover, asset return, multi-department clearance, final
    settlement (configurable components), exit interview, archive
    ========================================================= */

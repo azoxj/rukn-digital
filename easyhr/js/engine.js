@@ -1,5 +1,5 @@
 /* =========================================================
-   Easy HR — business rules engine (pure functions)
+   AZENK HR — business rules engine (pure functions)
    Every number used here comes from company settings so that
    policies can be changed without touching code. Nothing in this
    file encodes a legal rule; defaults live in the (editable) settings.

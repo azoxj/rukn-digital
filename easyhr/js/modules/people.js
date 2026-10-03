@@ -1,5 +1,5 @@
 /* =========================================================
-   Easy HR — employees, profile, organisation, onboarding
+   AZENK HR — employees, profile, organisation, onboarding
    ========================================================= */
 (function (EHR) {
   "use strict";

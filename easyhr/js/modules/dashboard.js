@@ -1,5 +1,5 @@
 /* =========================================================
-   Easy HR — role-based dashboards
+   AZENK HR — role-based dashboards
    ========================================================= */
 (function (EHR) {
   "use strict";

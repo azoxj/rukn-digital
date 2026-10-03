@@ -1,5 +1,5 @@
 /* =========================================================
-   Easy HR — data layer, services, auth (RBAC) and approval engine
+   AZENK HR — data layer, services, auth (RBAC) and approval engine
    ---------------------------------------------------------
    The whole app talks to EHR.api.* services. Today they read and
    write a localStorage document (demo only — NOT secure storage).

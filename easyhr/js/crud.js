@@ -1,5 +1,5 @@
 /* =========================================================
-   Easy HR — generic record module (list + stats + tabs + form +
+   AZENK HR — generic record module (list + stats + tabs + form +
    detail + approval actions). Modules describe *what* they need;
    this factory renders a consistent, accessible page.
    ========================================================= */

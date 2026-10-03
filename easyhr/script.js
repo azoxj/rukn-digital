@@ -1,5 +1,5 @@
 /* =========================================================
-   Easy HR — application shell: login, navigation, routing,
+   AZENK HR — application shell: login, navigation, routing,
    theme, notifications popover, global search & command palette.
    Module views live in js/modules/*.js and register themselves
    through EHR.view(key, definition).
@@ -137,7 +137,7 @@
       }
     }
     const item = navItem(r.view);
-    document.title = `${def && def.title ? def.title : item ? item[1] : "Easy HR"} | Easy HR`;
+    document.title = `${def && def.title ? def.title : item ? item[1] : "AZENK HR"} | AZENK HR`;
     $$(".nav__link").forEach((a) => {
       const on = a.dataset.nav === r.view;
       a.classList.toggle("active", on);
@@ -167,7 +167,7 @@
     login.hidden = false;
     login.innerHTML = `
       <div class="login__brand">
-        <div class="brand brand--light">${brandMark()}<span><b>Easy HR</b><small>منصة الموارد البشرية المتكاملة</small></span></div>
+        <div class="brand brand--light">${brandMark()}<span><b>AZENK HR</b><small>منصة الموارد البشرية المتكاملة</small></span></div>
         <h1>كل دورة حياة الموظف في منصة واحدة</h1>
         <p>من التوظيف والتعيين إلى الحضور بالنطاق الجغرافي، الإجازات، الرواتب، الأداء، ونهاية الخدمة — بواجهة عربية مصممة للشركات في السعودية.</p>
         <ul>
@@ -198,7 +198,7 @@
             <select class="input input--sm" id="otherDemo"><option value="">اختر دورًا…</option>${OTHER_ACCOUNTS.map(([id, l]) => `<option value="${id}">${l}</option>`).join("")}</select>
           </label>
           <p class="login__note">${icon("lock")}لا تُخزَّن أي كلمات مرور في هذه النسخة. تسجيل الدخول الحقيقي يتطلب خادمًا آمنًا.</p>
-          <a class="login__back" href="../index.html">${icon("arrow-right")}العودة إلى Rukn Digital</a>
+          <a class="login__back" href="../index.html">${icon("arrow-right")}العودة إلى AZENK</a>
         </form>
       </div>`;
     const form = $("#loginForm");
@@ -270,7 +270,7 @@
 
     $("#sidebar").innerHTML = `
       <div class="sidebar__top">
-        <a href="#/dashboard" class="brand">${brandMark()}<span><b>Easy HR</b><small>نظام الموارد البشرية</small></span></a>
+        <a href="#/dashboard" class="brand">${brandMark()}<span><b>AZENK HR</b><small>نظام الموارد البشرية</small></span></a>
         <button type="button" class="icon-btn sidebar__close" data-action="close-drawer" aria-label="إغلاق القائمة">${icon("x")}</button>
       </div>
       <div class="company-chip">
@@ -280,7 +280,7 @@
       <nav class="nav" aria-label="القائمة الرئيسية">${groups}</nav>
       <div class="sidebar__foot">
         <div class="demo-card">${icon("flask")}<p><b>وضع تجريبي</b>هذه نسخة تجريبية لعرض النظام. البيانات الحالية تجريبية.</p></div>
-        <a class="back-link" href="../index.html">${icon("arrow-right")}العودة إلى Rukn Digital</a>
+        <a class="back-link" href="../index.html">${icon("arrow-right")}العودة إلى AZENK</a>
       </div>`;
 
     const companies = EHR.db.companies;

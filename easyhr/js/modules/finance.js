@@ -1,5 +1,5 @@
 /* =========================================================
-   Easy HR — contracts, payroll, advances, allowances & benefits
+   AZENK HR — contracts, payroll, advances, allowances & benefits
    All rates come from company settings (editable). Nothing here
    encodes a legal rule or government fee.
    ========================================================= */
@@ -145,7 +145,7 @@
       const co = L().company(c.companyId);
       return `<div class="head"><h1>ملخص عقد عمل</h1><p>${esc(co.name)} — رقم العقد ${esc(c.number)}</p></div>
         <div class="grid"><p><b>الموظف:</b> ${esc(e.nameAr)} (${e.id})</p><p><b>المسمى:</b> ${esc(L().titleName(e.jobTitleId))}</p><p><b>النوع:</b> ${esc(CT[c.type])}</p><p><b>المدة:</b> ${U.fmtDate(c.start)} — ${c.end ? U.fmtDate(c.end) : "غير محدد"}</p><p><b>الراتب الأساسي:</b> ${U.money(c.salary)}</p><p><b>البدلات:</b> ${U.money(c.allowances)}</p><p><b>ساعات العمل:</b> ${c.hours} يوميًا</p><p><b>موقع العمل:</b> ${esc(L().workplaceName(c.workplaceId))}</p></div>
-        <p class="muted">مستند تجريبي مُولّد من نظام Easy HR — ليس عقدًا ملزمًا.</p><div class="sign"><span>توقيع الموظف</span><span>توقيع صاحب العمل</span></div>`;
+        <p class="muted">مستند تجريبي مُولّد من نظام AZENK HR — ليس عقدًا ملزمًا.</p><div class="sign"><span>توقيع الموظف</span><span>توقيع صاحب العمل</span></div>`;
     },
   });
   EHR.view("contracts", { title: "العقود", render: contracts.render });

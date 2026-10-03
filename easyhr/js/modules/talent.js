@@ -1,5 +1,5 @@
 /* =========================================================
-   Easy HR — performance (cycles, goals, reviews workflow) and
+   AZENK HR — performance (cycles, goals, reviews workflow) and
    training (courses, enrollments, certificates, skills)
    ========================================================= */
 (function (EHR) {
@@ -414,7 +414,7 @@
     });
   const printCert = (en) => {
     const c = courseOf(en);
-    U.printHTML("شهادة إتمام", `<div class="head" style="text-align:center"><h1>شهادة إتمام دورة تدريبية</h1><p>${esc(L().company(en.companyId).name)}</p></div><p style="text-align:center;font-size:18px">تشهد الإدارة بأن <b>${esc(L().empName(en.employeeId))}</b> قد أتم بنجاح دورة <b>${esc(c.name)}</b> بعدد ${c.hours} ساعة تدريبية.</p><div class="grid"><p><b>رقم الشهادة:</b> ${en.certificateNo}</p><p><b>تاريخ الإتمام:</b> ${U.fmtDate(c.end)}</p><p><b>صالحة حتى:</b> ${en.certExpiry ? U.fmtDate(en.certExpiry) : "بدون انتهاء"}</p><p><b>الدرجة:</b> ${en.score}</p></div><p class="muted">شهادة تجريبية صادرة من نظام Easy HR.</p><div class="sign"><span>مسؤول التدريب</span><span>مدير الموارد البشرية</span></div>`);
+    U.printHTML("شهادة إتمام", `<div class="head" style="text-align:center"><h1>شهادة إتمام دورة تدريبية</h1><p>${esc(L().company(en.companyId).name)}</p></div><p style="text-align:center;font-size:18px">تشهد الإدارة بأن <b>${esc(L().empName(en.employeeId))}</b> قد أتم بنجاح دورة <b>${esc(c.name)}</b> بعدد ${c.hours} ساعة تدريبية.</p><div class="grid"><p><b>رقم الشهادة:</b> ${en.certificateNo}</p><p><b>تاريخ الإتمام:</b> ${U.fmtDate(c.end)}</p><p><b>صالحة حتى:</b> ${en.certExpiry ? U.fmtDate(en.certExpiry) : "بدون انتهاء"}</p><p><b>الدرجة:</b> ${en.score}</p></div><p class="muted">شهادة تجريبية صادرة من نظام AZENK HR.</p><div class="sign"><span>مسؤول التدريب</span><span>مدير الموارد البشرية</span></div>`);
   };
 
   let trTab = "courses";
