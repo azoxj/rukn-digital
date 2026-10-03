@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://azoxj.github.io/rukn-digital/sitemap.xml
+Sitemap: https://azenk.sa/sitemap.xml
