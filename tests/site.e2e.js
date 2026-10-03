@@ -53,9 +53,15 @@ const ok = (c, m) => { if (c) pass++; else { fail++; console.log("FAIL " + m); }
   ok(statuses.every((s) => ["جاهز", "Demo متاح", "قيد التطوير"].includes(s)), "allowed statuses " + statuses);
   ok(!(await p.textContent("#main")).match(/\d[\d,]*\s*(ريال|SAR|ر\.س)/), "no numeric prices on systems page");
   const live = await p.$$eval("#main .product a.btn[href]:not([data-wa])", (x) => x.map((a) => a.getAttribute("href")));
-  ok(live.length === 7, "7 live demos " + live);
+  ok(live.length === 4, "4 live browser demos " + live);
   for (const h of live) { const r = await p.request.get(new URL(h, BASE + "products/").href); ok(r.status() === 200, `demo ${h} reachable`); }
+  ok(!live.some((h) => h.includes("demos/")), "no public shared-login demos linked");
+  ok((await p.request.get(BASE + "demos/callcenter/")).status() === 404, "public demos/ not published");
+  const reqDemo = await p.$$eval("#main .product a[data-wa^='demo:']", (x) => x.map((a) => a.textContent.trim()));
+  ok(reqDemo.length === 3 && reqDemo.every((t) => t.includes("اطلب Demo")), "server systems: «اطلب Demo» via WhatsApp while Demo Center is not configured " + reqDemo);
+  ok(!(await p.$("a[href*='/#/login']")), "no Demo Center login link while DEMO_CENTER_URL is empty");
   const w = await waTexts();
+  ok(w.includes("السلام عليكم، أرغب في طلب Demo لنظام AZENK Call Center.\n\nالاسم:\nالنشاط:\nعدد المستخدمين:\nالوقت المناسب للعرض:"), "structured demo request message");
   ok(w.some((t) => t === "السلام عليكم، أرغب في عرض سعر لنظام AZENK HR.\n\nالاسم:\nالنشاط:\nعدد المستخدمين:\nملاحظات:"), "structured quote message");
   await p.goto(BASE + "products/#azenk-hr");
   await p.waitForSelector(".pmodal.is-open");
@@ -63,6 +69,23 @@ const ok = (c, m) => { if (c) pass++; else { fail++; console.log("FAIL " + m); }
   ok((await waTexts()).includes("السلام عليكم، أرغب في معرفة تفاصيل نظام AZENK HR.\n\nالاسم:\nالنشاط:\nعدد المستخدمين:\nملاحظات:"), "structured details message (spec text)");
   await p.keyboard.press("Escape");
   ok(!(await p.$(".pmodal.is-open")), "modal closes with Escape");
+
+  /* ---------- Demo Center configured (config only) ---------- */
+  {
+    const dc = await b.newContext({ viewport: { width: 1440, height: 900 } });
+    await dc.route(/fonts\.(googleapis|gstatic)\.com/, (r) => r.abort());
+    await dc.addInitScript(() => { let v; Object.defineProperty(window, "AZENK_CONFIG", { configurable: true, get: () => v, set: (x) => { v = { ...x, DEMO_CENTER_URL: "https://demo.azenk.sa/" }; } }); });
+    const q = await dc.newPage();
+    await q.goto(BASE + "products/");
+    await q.waitForSelector("#main .product");
+    const links = await q.$$eval("#main .product a[data-demo-request]", (x) => x.map((a) => a.getAttribute("href")));
+    ok(JSON.stringify(links) === JSON.stringify(["https://demo.azenk.sa/#/request?product=call-center", "https://demo.azenk.sa/#/request?product=requests", "https://demo.azenk.sa/#/request?product=graduation"]), "«اطلب Demo» → Demo Center request with product " + links);
+    ok(links.every((h) => !/user|pass/i.test(h)), "no credentials in Demo Center URLs");
+    ok(await q.$("footer a[href='https://demo.azenk.sa/#/login']"), "footer: Sign in to Demo Center");
+    ok((await q.textContent("footer")).includes("تسجيل الدخول إلى Demo Center"), "Demo Center login label");
+    ok((await q.$$("a[href^='https://wa.me/']")).length > 0, "WhatsApp kept alongside Demo Center");
+    await dc.close();
+  }
 
   /* ---------- home paths ---------- */
   await p.goto(BASE);

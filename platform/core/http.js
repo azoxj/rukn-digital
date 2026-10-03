@@ -156,7 +156,7 @@ export function createHandler({ router, auth, staticDirs = [], trustProxy = fals
         }
       }
 
-      const session = await auth.resolve(req, ctx);
+      const session = route.opts.skipSession ? null : await auth.resolve(req, ctx);
       if (session) { ctx.session = session.session; ctx.user = session.user; }
       if (route.opts.auth && !ctx.user) throw unauthorized();
       if (ctx.user && ctx.user.must_change_password && route.opts.auth && !route.opts.allowPasswordChange) {

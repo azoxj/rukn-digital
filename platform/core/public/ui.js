@@ -38,6 +38,8 @@
   AZ.addDays = (day, n) => { const d = new Date(day + "T12:00:00"); d.setDate(d.getDate() + n); const p = (x) => String(x).padStart(2, "0"); return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}`; };
 
   /* ---------------- API ---------------- */
+  // When served by AZENK Demo Center under /demo-target/<product>/, API calls are prefixed.
+  AZ.apiBase = () => window.AZ_API_BASE || "";
   AZ.state = { user: null, csrf: "", perms: new Set(), app: null };
   AZ.can = (p) => AZ.state.perms.has(p);
 
@@ -53,7 +55,7 @@
     if (opts.raw) { payload = body; if (opts.type) headers["Content-Type"] = opts.type; }
     else if (body !== undefined && method !== "GET") { headers["Content-Type"] = "application/json"; payload = JSON.stringify(body); }
     let res;
-    try { res = await fetch(path, { method, headers, body: payload, credentials: "same-origin" }); }
+    try { res = await fetch(AZ.apiBase() + path, { method, headers, body: payload, credentials: "same-origin" }); }
     catch (e) { throw new ApiError(0, "تعذّر الاتصال بالخادم. تحقق من الاتصال وأن الخادم يعمل."); }
     const ct = res.headers.get("content-type") || "";
     const data = ct.includes("application/json") ? await res.json().catch(() => ({})) : null;
@@ -73,7 +75,7 @@
 
   /** Download a file from an authenticated GET endpoint. */
   AZ.download = async (path, fallbackName) => {
-    const res = await fetch(path, { credentials: "same-origin" });
+    const res = await fetch(AZ.apiBase() + path, { credentials: "same-origin" });
     if (!res.ok) { let m = "تعذّر التنزيل"; try { m = (await res.json()).error.message; } catch (e) { /* ignore */ } throw new ApiError(res.status, m); }
     const cd = res.headers.get("content-disposition") || "";
     const m = /filename\*?=(?:UTF-8'')?"?([^";]+)"?/i.exec(cd);
@@ -234,7 +236,31 @@
   };
 
   /* ---------------- auth screens ---------------- */
+  /* Opened from AZENK Demo Center: choose a role; the server signs you in after checking the demo. */
+  const renderDemoSso = () => {
+    const cfg = AZ.config;
+    document.body.className = "is-auth";
+    $("#root").innerHTML = `<main class="auth" id="main"><div class="auth__card">
+      <div class="auth__brand"><span class="mark" aria-hidden="true">A</span><div><b>${esc(cfg.title)}</b><small>AZENK Demo Center</small></div></div>
+      <h1>اختر دورك للتجربة</h1>
+      <p class="hint">كل دور يرى النظام بصلاحياته. بياناتك التجريبية خاصة بحسابك.</p>
+      <div class="demo-login__list">${window.AZ_DEMO_SSO.map((r) => `<button type="button" class="btn btn--ghost" data-sso="${esc(r.role)}">${esc(r.label)}</button>`).join("")}</div>
+      <p class="form-err" role="alert" hidden></p></div></main>`;
+    $(".auth__card").addEventListener("click", async (e) => {
+      const b = e.target.closest("[data-sso]");
+      if (!b) return;
+      b.disabled = true;
+      try {
+        await AZ.api("POST", "/api/demo-sso", { role: b.dataset.sso }, { noAuthRedirect: true });
+        const me = await AZ.api("GET", "/api/auth/me", undefined, { noAuthRedirect: true });
+        setSession(me);
+        boot();
+      } catch (err) { const box = $(".form-err"); box.textContent = err.message; box.hidden = false; b.disabled = false; }
+    });
+  };
+
   AZ.renderLogin = () => {
+    if (Array.isArray(window.AZ_DEMO_SSO) && window.AZ_DEMO_SSO.length) return renderDemoSso();
     const cfg = AZ.config;
     document.body.className = "is-auth";
     $("#root").innerHTML = `<main class="auth" id="main">

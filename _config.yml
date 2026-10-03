@@ -5,3 +5,4 @@ exclude:
   - docs
   - tools
   - tests
+  - demos

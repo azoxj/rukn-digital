@@ -63,7 +63,7 @@ window.AZENK_EN = {
   "products.more": "All systems",
   "products.h1": "AZENK Systems",
   "products.lead": "Every system here is actually programmed and tested. Each has a clear status, and we state where it runs: in the browser or on a server with a database.",
-  "products.legend": "<b>Ready</b>: usable now. <b>Demo available</b>: a working version you can try yourself now. Server systems run their demo in your browser with the same system code and sample data.",
+  "products.legend": "<b>Ready</b>: usable now. <b>Demo available</b>: a working version you can try yourself now. Server systems: request a demo and get a private demo account for 24 hours.",
   "order.eyebrow": "How to order",
   "order.title": "From trial to go-live",
   "order.desc": "There is no shopping cart or online payment on the website; we talk to you on WhatsApp and price depends on the number of users and the customisation.",

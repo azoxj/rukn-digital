@@ -2,7 +2,7 @@
   "name": "azenk-platform",
   "version": "1.0.0",
   "private": true,
-  "description": "AZENK server products (Call Center, Graduation, Requests) on a shared zero-dependency core: Node built-ins + SQLite.",
+  "description": "AZENK server products (Call Center, Graduation, Requests) and AZENK Demo Center on a shared zero-dependency core: Node built-ins + SQLite.",
   "type": "module",
   "engines": {
     "node": ">=22.13"
@@ -11,6 +11,7 @@
     "callcenter": "node --disable-warning=ExperimentalWarning apps/callcenter/server.js",
     "graduation": "node --disable-warning=ExperimentalWarning apps/graduation/server.js",
     "requests": "node --disable-warning=ExperimentalWarning apps/requests/server.js",
+    "democenter": "node --disable-warning=ExperimentalWarning apps/democenter/server.js",
     "bootstrap": "node --disable-warning=ExperimentalWarning scripts/bootstrap.js",
     "seed:demo": "node --disable-warning=ExperimentalWarning scripts/seed-demo.js",
     "check": "node scripts/check.js",

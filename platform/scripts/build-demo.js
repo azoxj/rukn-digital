@@ -1,4 +1,5 @@
-// Build the public browser demos of the server products into ../demos/ (served by GitHub Pages):
+// Build offline browser previews of the server products into ../demos/ (local only — git-ignored and
+// excluded from GitHub Pages; customer demos go through AZENK Demo Center with per-customer accounts):
 //   npm run build:demo
 // Each demo runs the real app code in the visitor's browser on an in-memory SQLite (sql.js).
 import { build } from "esbuild";

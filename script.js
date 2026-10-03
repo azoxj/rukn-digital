@@ -81,7 +81,8 @@
     runtimeBrowser: { ar: "يعمل في المتصفح", en: "Runs in the browser" },
     runtimeServer: { ar: "خادم + قاعدة بيانات", en: "Server + database" },
     runtimeBrowserNote: { ar: "نسخة تعمل في المتصفح، والبيانات تُحفظ على جهازك.", en: "Runs in the browser; data is stored on your device." },
-    runtimeServerNote: { ar: "نظام بخادم وقاعدة بيانات وحسابات وصلاحيات. الـ Demo يشغّل نفس كود النظام داخل متصفحك ببيانات تجريبية وأدوار جاهزة، ولا تُحفظ بياناته بعد تحديث الصفحة. التشغيل الفعلي للمنشأة يكون على خادم.", en: "A server system with a database, accounts and permissions. The demo runs the same system code inside your browser with sample data and ready-made roles; nothing is kept after a page reload. Real deployments run on a server." },
+    runtimeServerNote: { ar: "نظام بخادم وقاعدة بيانات وحسابات وصلاحيات. اطلب Demo ونجهّز لك حسابًا خاصًا بمنشأتك ببيانات تجريبية، صالحًا لمدة 24 ساعة من أول دخول.", en: "A server system with a database, accounts and permissions. Request a demo and we set up a private account for you with sample data, valid for 24 hours from your first sign-in." },
+    demoCenterLogin: { ar: "تسجيل الدخول إلى Demo Center", en: "Sign in to Demo Center" },
     relatedSystems: { ar: "أنظمة ذات صلة", en: "Related systems" },
     requestService: { ar: "اطلب الخدمة", en: "Request service" },
     priceOnRequest: { ar: "السعر عند الطلب", en: "Price on request" },
@@ -131,6 +132,11 @@
   const waReady = /^\d{8,15}$/.test(RAW_NUMBER);
   const WA_NUMBER = waReady ? RAW_NUMBER : "";
   const waHref = (text) => (waReady ? `https://wa.me/${WA_NUMBER}${text ? `?text=${encodeURIComponent(text)}` : ""}` : null);
+
+  // AZENK Demo Center (CFG.DEMO_CENTER_URL). Empty → not deployed yet: demo requests go to WhatsApp.
+  const DEMO_CENTER = /^(https:\/\/|http:\/\/(localhost|127\.0\.0\.1)(:\d+)?)[^\s?#]*$/.test(String(CFG.DEMO_CENTER_URL || "")) ? String(CFG.DEMO_CENTER_URL).replace(/\/+$/, "") : "";
+  const demoRequestHref = (p) => `${DEMO_CENTER}/#/request?product=${encodeURIComponent(p.demoCenter || "")}`;
+  const demoCenterLink = (cls) => (DEMO_CENTER ? `<a class="${cls}" href="${esc(DEMO_CENTER)}/#/login" rel="noopener">${ui("demoCenterLogin")}</a>` : "");
   const phoneDisplay = () => {
     if (!waReady) return "—";
     if (WA_NUMBER.startsWith("966") && WA_NUMBER.length === 12) return `+966 ${WA_NUMBER.slice(3, 5)} ${WA_NUMBER.slice(5, 8)} ${WA_NUMBER.slice(8)}`;
@@ -295,6 +301,7 @@
       <nav aria-label="${ui("menu")}"><ol class="mnav__links">${NAV.map(([k, href], i) => `<li style="--i:${i}"><a href="${ROOT}${href || (ROOT ? "" : "./")}" class="${k === PAGE ? "is-active" : ""}" ${k === PAGE ? 'aria-current="page"' : ""}><em>0${i + 1}</em>${ui(k)}</a></li>`).join("")}</ol></nav>
       <div class="mnav__foot">
         <a class="btn btn--gold btn--block" data-wa="start" href="#">${icon("whatsapp")}${ui("startProject")}</a>
+        ${demoCenterLink("btn btn--ghost btn--block")}
         <div class="mnav__row">${langBtn("lang-btn lang-btn--lg")}${tiktokLink("icon-link icon-link--lg")}</div>
       </div>`;
   };
@@ -315,6 +322,7 @@
         <div class="footer__col"><h3>${ui("footerContact")}</h3><ul>
           <li><a data-wa="general" href="#"><span dir="ltr">${phoneDisplay()}</span></a></li>
           <li><a href="mailto:${esc(CFG.EMAIL)}" dir="ltr">${esc(CFG.EMAIL)}</a></li>
+          ${DEMO_CENTER ? `<li>${demoCenterLink("")}</li>` : ""}
           <li>${lang === "ar" ? "المملكة العربية السعودية" : "Saudi Arabia"}</li>
         </ul></div>
       </div>
@@ -382,10 +390,11 @@
       ${mark("ph")}<b dir="ltr">${esc(p.name)}</b><small>${ui("previewSoon")}</small></div>`;
   const productVisual = (p) => (p.image ? `<img src="${ROOT}${esc(p.image)}" alt="${esc(p.name)} — ${esc(t(p.tagline))}" loading="lazy" width="800" height="500">` : productPlaceholder(p));
   const priceHTML = () => `<span class="price price--ask">${ui("priceOnRequest")}</span>`;
-  // Demo button: a live demo link, a WhatsApp demo request for server systems, or nothing.
+  // Demo button: a live browser demo, a Demo Center request (WhatsApp until Demo Center is configured), or nothing.
   const demoBtn = (p, cls = "btn--sm") => {
     const d = p.demo || {};
     if (d.type === "live" && d.url) return `<a class="btn btn--ghost ${cls}" href="${ROOT}${esc(d.url)}">${icon("external")}${ui(p.status === "ready" ? "tryNow" : "tryDemo")}</a>`;
+    if (d.type === "request" && DEMO_CENTER && p.demoCenter) return `<a class="btn btn--ghost ${cls}" data-demo-request="${esc(p.demoCenter)}" href="${esc(demoRequestHref(p))}" rel="noopener">${icon("external")}${ui("requestDemo")}</a>`;
     if (d.type === "request") return `<a class="btn btn--ghost ${cls}" data-wa="demo:${p.id}" href="#">${icon("whatsapp")}${ui("requestDemo")}</a>`;
     return "";
   };

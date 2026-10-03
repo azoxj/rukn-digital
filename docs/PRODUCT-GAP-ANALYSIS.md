@@ -20,6 +20,7 @@ Reuse: **core** = `platform/core` (auth, sessions, CSRF, RBAC, tenants, audit, n
 
 ## Built in this round
 - AZENK Presentations, AZENK Call Center, AZENK Graduation (see `platform/README.md` and `presentations/`).
+- **AZENK Demo Center** built on the same core: demo requests, per-customer accounts with 24 h access from the first login, a server-side gate in front of every product, isolated seeded instances for the server products, staff admin with audit. The four browser products are reachable through it but still keep their data in the browser — their server editions (#1 HR first) remain the main gap.
 - **#2 AZENK Requests** built afterwards on the shared core (types builder, multi-step approvals, attachments, reports; 15 API tests + UI E2E). Recommended next: **#1 AZENK HR server edition**.
 
 ## Large items — architecture notes (plan only)

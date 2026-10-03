@@ -68,7 +68,7 @@ Nothing is pushed, merged or deployed without explicit approval.
 
 | Item | Status | Verified by |
 |---|---|---|
-| Platform IA: header (7 links + «اطلب حلًا»), hero, 4 paths, systems, finder, services, process | Done | `tests/site.e2e.js` (265 checks incl. 320–1440 px, AR/EN) |
+| Platform IA: header (7 links + «اطلب حلًا»), hero, 4 paths, systems, finder, services, process | Done | `tests/site.e2e.js` (274 checks incl. 320–1440 px, AR/EN) |
 | الحلول — rule-based solution finder (labelled "not AI") | Done | site E2E |
 | ابنِ نظامك — 8 stages + request form → WhatsApp / e-mail (no fake backend) | Done | site E2E |
 | Easy Fleet removed from site, data, SEO, sitemap | Done (other branch untouched) | site E2E text scan |
@@ -78,9 +78,13 @@ Nothing is pushed, merged or deployed without explicit approval.
 | AZENK Call Center (server, SQLite, RBAC, tenants) | MVP done | 33 API tests (+ core) + 23 UI E2E |
 | AZENK Graduation (server, uploads, reviews, rubric) | MVP done | 15 API tests + UI E2E |
 | AZENK Requests (server: request types, multi-step approvals, attachments) | MVP done | 15 API tests + UI E2E |
+| AZENK Demo Center (per-request demo accounts, 24 h from first login, server-side expiry, product gateway, staff admin) | MVP done | 21 API tests (fake clock) + full browser E2E |
+| Website «اطلب Demo» → Demo Center request form (config `DEMO_CENTER_URL`; WhatsApp fallback while empty) + «تسجيل الدخول إلى Demo Center» | Done | site E2E (both states) |
+| Public shared-login browser demos (`demos/`) unpublished | Done | site E2E (404) |
 | Product gap analysis | Done | `docs/PRODUCT-GAP-ANALYSIS.md` |
 
 Not done / needs your decision:
-- Hosting for Call Center, Graduation and Requests for real customers (Node server). Public demos of all three now run in the visitor's browser from `demos/` (same code, sample data), so every system on the site has a self-service demo.
-- AZENK HR, FleetPro and ClinicFlow remain browser demos (labelled as such); server editions are planned in the gap analysis.
+- Hosting for Demo Center, Call Center, Graduation and Requests (Node server). Until Demo Center is deployed and `DEMO_CENTER_URL` is set, «اطلب Demo» for the server systems opens a WhatsApp demo request.
+- The earlier public in-browser demos (`demos/`, shared demo login) are no longer published, per the Demo Center rule "no public demo credentials"; the build tooling remains for offline previews only.
+- AZENK HR, FleetPro, ClinicFlow and Presentations remain browser apps (labelled as such, also inside Demo Center); server editions are planned in the gap analysis.
 - Nothing pushed, merged or deployed.

@@ -11,6 +11,11 @@
    - TIKTOK_URL: full profile link (https://www.tiktok.com/@...).
      Leave it empty until the official account link is confirmed;
      the icon then shows as "coming soon" instead of a dead link.
+   - DEMO_CENTER_URL: base URL of AZENK Demo Center (a server app in
+     platform/apps/democenter), e.g. "https://demo.azenk.sa". While it
+     is empty, «اطلب Demo» falls back to a WhatsApp demo request and the
+     «تسجيل الدخول إلى Demo Center» link is hidden. No credentials ever
+     go in this file or in a URL.
    ========================================================= */
 window.AZENK_CONFIG = {
   BRAND: "AZENK",
@@ -21,6 +26,7 @@ window.AZENK_CONFIG = {
   WHATSAPP_NUMBER: "966507192393",
   EMAIL: "azozazo88z@gmail.com",
   TIKTOK_URL: "",
+  DEMO_CENTER_URL: "",
 
   DEFAULT_LANG: "ar",
 };

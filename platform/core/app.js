@@ -7,10 +7,11 @@ import { Router, createHandler, listen } from "./http.js";
 import { createAuth } from "./auth.js";
 import { createAudit, createNotifier } from "./services.js";
 import { commonRoutes } from "./common-routes.js";
+import { systemClock } from "./clock.js";
 
 const CORE_PUBLIC = join(dirname(fileURLToPath(import.meta.url)), "public");
 
-export function createPlatformApp(def, { dbFile, dataDir, log = console } = {}) {
+export function createPlatformApp(def, { dbFile, dataDir, log = console, clock = systemClock } = {}) {
   const db = openDb(dbFile);
   migrate(db, def.name, def.migrationsDir);
   const audit = createAudit(db);
@@ -21,7 +22,7 @@ export function createPlatformApp(def, { dbFile, dataDir, log = console } = {}) 
   router.get("/api/health", { auth: false }, () => ({ ok: true, app: def.name }));
   auth.routes(router);
   commonRoutes(router, { db, app: def, auth, audit });
-  const services = { db, audit, notify, auth, can: auth.can, dataDir: dataDir || (dbFile === ":memory:" ? null : dirname(dbFile)) };
+  const services = { db, audit, notify, auth, clock, can: auth.can, dataDir: dataDir || (dbFile === ":memory:" ? null : dirname(dbFile)) };
   def.routes(router, services);
 
   const handler = createHandler({

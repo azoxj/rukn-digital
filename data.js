@@ -8,11 +8,12 @@
    - status: "ready" → جاهز       (usable now)
              "demo"  → Demo متاح   (a real working demo exists)
              "dev"   → قيد التطوير (real code, not released yet)
-   - demo.type: "live"    → the demo opens on this site (demo.url).
-                            Server systems run their real code in the
-                            visitor's browser (demos/, built by
-                            platform/scripts/build-demo.js).
-                "request" → demo shown in a live session on request
+   - demo.type: "live"    → a browser demo that opens on this site (demo.url).
+                "request" → «اطلب Demo»: a request in AZENK Demo Center
+                            (CONFIG.DEMO_CENTER_URL), which gives the customer
+                            a private demo account for 24 hours; WhatsApp
+                            demo request while Demo Center is not configured.
+   - demoCenter: the product id in AZENK Demo Center (platform/apps/democenter/products.js).
    - runtime: "browser" → runs in the browser, data stays on the device
               "server"  → Node.js server + database + accounts/roles
    - image: a real screenshot of the system (relative to site root).
@@ -26,6 +27,7 @@ window.AZENK_DATA = {
       name: "AZENK HR",
       status: "demo",
       demo: { type: "live", url: "easyhr/index.html" },
+      demoCenter: "hr",
       runtime: "browser",
       image: "assets/work/azenk-hr.webp",
       tagline: { ar: "نظام الموارد البشرية", en: "HR management system" },
@@ -50,7 +52,8 @@ window.AZENK_DATA = {
       id: "azenk-callcenter",
       name: "AZENK Call Center",
       status: "demo",
-      demo: { type: "live", url: "demos/callcenter/" },
+      demo: { type: "request" },
+      demoCenter: "call-center",
       runtime: "server",
       image: "assets/work/callcenter.webp",
       tagline: { ar: "نظام مركز الاتصال وخدمة العملاء", en: "Call centre & customer service system" },
@@ -75,7 +78,8 @@ window.AZENK_DATA = {
       id: "azenk-requests",
       name: "AZENK Requests",
       status: "demo",
-      demo: { type: "live", url: "demos/requests/" },
+      demo: { type: "request" },
+      demoCenter: "requests",
       runtime: "server",
       image: "assets/work/requests.webp",
       tagline: { ar: "الطلبات الداخلية والموافقات", en: "Internal requests & approvals" },
@@ -100,7 +104,8 @@ window.AZENK_DATA = {
       id: "azenk-graduation",
       name: "AZENK Graduation",
       status: "demo",
-      demo: { type: "live", url: "demos/graduation/" },
+      demo: { type: "request" },
+      demoCenter: "graduation",
       runtime: "server",
       image: "assets/work/graduation.webp",
       tagline: { ar: "نظام إدارة مشاريع التخرج", en: "Graduation project management" },
@@ -126,6 +131,7 @@ window.AZENK_DATA = {
       name: "AZENK Presentations",
       status: "ready",
       demo: { type: "live", url: "presentations/" },
+      demoCenter: "presentations",
       runtime: "browser",
       image: "assets/work/presentations.webp",
       tagline: { ar: "إنشاء العروض وتصديرها إلى PowerPoint", en: "Build presentations and export to PowerPoint" },
@@ -151,6 +157,7 @@ window.AZENK_DATA = {
       name: "FleetPro",
       status: "demo",
       demo: { type: "live", url: "fleetpro/index.html" },
+      demoCenter: "fleet",
       runtime: "browser",
       image: "assets/work/fleetpro.webp",
       tagline: { ar: "نظام إدارة الأسطول", en: "Fleet management system" },
@@ -176,6 +183,7 @@ window.AZENK_DATA = {
       name: "ClinicFlow",
       status: "demo",
       demo: { type: "live", url: "clinicflow/index.html" },
+      demoCenter: "clinic",
       runtime: "browser",
       image: "assets/work/clinicflow.webp",
       tagline: { ar: "نظام إدارة العيادات", en: "Clinic management system" },

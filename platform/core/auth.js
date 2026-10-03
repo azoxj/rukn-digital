@@ -123,6 +123,9 @@ export function createAuth({ db, app, audit }) {
     revokeUser: (userId) => q.delUser.run(userId),
     cleanup: () => q.expired.run(nowIso()),
     permissionsOf: (role) => [...(perms.get(role) || [])],
+    /** Open a session for `user` (used by trusted server-side flows such as Demo Center SSO). */
+    issueSession: (ctx, user) => startSession(ctx, user),
+    cookieName,
     resetLimiters: () => { loginLimiter.clear(); ipLimiter.clear(); },
     created,
   };

@@ -1,4 +1,4 @@
-// End-to-end checks for the public browser demos in demos/ (serve the repo root on :8080).
+// Local check of the offline browser previews (npm run build:demo in platform/, then serve the repo root on :8080).
 //   NODE_PATH_PW=$(npm root -g)/playwright node tests/demos.e2e.js
 const { chromium } = require(process.env.NODE_PATH_PW || "playwright");
 const B=process.env.BASE||'http://localhost:8080/demos/';
