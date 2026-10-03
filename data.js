@@ -70,6 +70,31 @@ window.AZENK_DATA = {
       },
     },
     {
+      id: "azenk-requests",
+      name: "AZENK Requests",
+      status: "demo",
+      demo: { type: "request" },
+      runtime: "server",
+      image: "assets/work/requests.webp",
+      tagline: { ar: "الطلبات الداخلية والموافقات", en: "Internal requests & approvals" },
+      summary: {
+        ar: "طلبات الإجازة والشراء والدعم التقني وغيرها بنماذج تحددها أنت ومسارات موافقة على مراحل.",
+        en: "Leave, purchase, IT support and any request you define, with multi-step approval paths.",
+      },
+      problem: {
+        ar: "طلبات داخلية عبر الورق والواتساب، وموافقات تتأخر أو تضيع، ولا أحد يعرف أين وصل الطلب.",
+        en: "Internal requests on paper and chat, approvals that stall or get lost, and nobody knows where a request is.",
+      },
+      description: {
+        ar: "AZENK Requests نظام بخادم وقاعدة بيانات للطلبات الداخلية: يحدد مدير النظام أنواع الطلبات وحقولها (نص، رقم، تاريخ، قائمة، مربع اختيار) ومسار الموافقة لكل نوع — المدير المباشر، أو دور، أو شخص محدد — مع مدة استجابة لكل مرحلة. يقدّم الموظف الطلب مع مرفقاته، ويوافق المعتمد أو يرفض أو يعيده للتعديل، ويُعاد الإرسال بعد التعديل. يشمل صندوق موافقات، وإشعارات، وتعليقات، ولوحة تحكم، وتقارير بأوقات البت وتصدير CSV، وسجل تدقيق، ويمنع اعتماد الشخص لطلبه بنفسه. الأدوار: مدير النظام، المدير، الموظف. الإشعارات داخل النظام؛ ولا يتضمن حاليًا إرسال بريد إلكتروني أو رسائل نصية.",
+        en: "AZENK Requests is a server-backed system for internal requests: the admin defines request types, their fields (text, number, date, list, checkbox) and each type's approval path — direct manager, a role or a named person — with a response time per step. Employees submit requests with attachments; approvers approve, reject or return them for changes, and returned requests are resubmitted. It includes an approvals inbox, notifications, comments, a dashboard, reports with decision times and CSV export, and an audit log, and it blocks self-approval. Roles: admin, manager, employee. Notifications are in-app; e-mail or SMS delivery is not included today.",
+      },
+      features: {
+        ar: ["أنواع طلبات وحقول تحددها بنفسك", "مسارات موافقة: المدير المباشر، دور، أو شخص محدد", "موافقة، رفض، أو إعادة للتعديل مع التعليق", "مرفقات موثّقة النوع وتعليقات وإشعارات", "مدة استجابة لكل مرحلة وتنبيه بالمتأخر", "تقارير بأوقات البت وتصدير CSV وسجل تدقيق"],
+        en: ["Request types and fields you define", "Approval paths: direct manager, role or named person", "Approve, reject or return with comments", "Type-checked attachments, comments and notifications", "Response time per step with overdue tracking", "Decision-time reports, CSV export and audit log"],
+      },
+    },
+    {
       id: "azenk-graduation",
       name: "AZENK Graduation",
       status: "demo",
@@ -192,13 +217,13 @@ window.AZENK_DATA = {
       points: { ar: ["تصميم واجهة المتجر وصفحات المنتجات", "إعداد المنتجات والتصنيفات والشحن", "ربط بوابات الدفع المعتمدة لدى المنصة", "تقارير الطلبات والمبيعات"], en: ["Storefront and product page design", "Products, categories and shipping setup", "Connecting the platform's supported payment gateways", "Order and sales reports"] },
     },
     {
-      id: "automation", icon: "flow", related: [],
+      id: "automation", icon: "flow", related: ["azenk-requests"],
       title: { ar: "الأتمتة", en: "Automation" },
       desc: { ar: "تحويل الإجراءات اليدوية والمتكررة إلى خطوات رقمية تلقائية.", en: "Turning manual, repetitive procedures into automatic digital steps." },
       points: { ar: ["أتمتة المهام المتكررة والتقارير", "نماذج رقمية بدل الورق", "تنبيهات ومسارات موافقة", "لوحات متابعة"], en: ["Automating repetitive tasks and reports", "Digital forms instead of paper", "Alerts and approval flows", "Monitoring dashboards"] },
     },
     {
-      id: "business", icon: "building", related: ["azenk-hr", "azenk-callcenter", "fleetpro", "clinicflow"],
+      id: "business", icon: "building", related: ["azenk-hr", "azenk-requests", "azenk-callcenter", "fleetpro", "clinicflow"],
       title: { ar: "حلول الأعمال", en: "Business Solutions" },
       desc: { ar: "تطبيق أنظمة AZENK في منشأتك وتخصيصها لإجراءاتك وبياناتك.", en: "Implementing AZENK systems in your organisation and tailoring them to your processes and data." },
       points: { ar: ["تخصيص الأنظمة لإجراءات المنشأة", "نقل البيانات من الإكسل أو نظام قديم", "تدريب المستخدمين", "دعم ما بعد التشغيل"], en: ["Tailoring systems to your processes", "Migrating data from spreadsheets or a legacy system", "User training", "Post-launch support"] },
@@ -228,7 +253,7 @@ window.AZENK_DATA = {
       points: { ar: ["ربط عبر واجهات API", "استيراد وتصدير البيانات", "مزامنة بين الأنظمة", "توثيق الربط واختباره"], en: ["API integrations", "Data import and export", "Synchronisation between systems", "Documented, tested integrations"] },
     },
     {
-      id: "transformation", icon: "spark", related: [],
+      id: "transformation", icon: "spark", related: ["azenk-requests"],
       title: { ar: "التحول الرقمي", en: "Digital Transformation" },
       desc: { ar: "دراسة إجراءاتك الحالية ووضع خطة عملية لتحويلها إلى حلول رقمية على مراحل.", en: "Reviewing your current procedures and drawing a practical, phased plan to digitise them." },
       points: { ar: ["تحليل الوضع الحالي", "تحديد الأولويات والمراحل", "اختيار الحل: جاهز أو مخصص", "متابعة التنفيذ والقياس"], en: ["Current-state analysis", "Priorities and phases", "Choosing ready or custom solutions", "Implementation follow-up and measurement"] },
@@ -262,6 +287,7 @@ window.AZENK_DATA = {
         ["appointments", { ar: "المواعيد والمرضى والفواتير", en: "Appointments, patients and invoices" }],
         ["slides", { ar: "إعداد عروض تقديمية", en: "Preparing presentations" }],
         ["website", { ar: "موقع أو متجر إلكتروني", en: "A website or online store" }],
+        ["requests", { ar: "طلبات داخلية وموافقات (إجازات، مشتريات، دعم تقني)", en: "Internal requests and approvals (leave, purchases, IT)" }],
         ["manual", { ar: "إجراءات ورقية أو يدوية متكررة", en: "Paper or repetitive manual procedures" }],
         ["integration", { ar: "أنظمة غير مترابطة", en: "Disconnected systems" }],
       ] },
@@ -275,9 +301,9 @@ window.AZENK_DATA = {
       ] },
     ],
     // problem → systems that address it
-    problemSystems: { hr: ["azenk-hr"], customers: ["azenk-callcenter"], projects: ["azenk-graduation"], vehicles: ["fleetpro"], appointments: ["clinicflow"], slides: ["azenk-presentations"] },
+    problemSystems: { hr: ["azenk-hr"], requests: ["azenk-requests"], manual: ["azenk-requests"], customers: ["azenk-callcenter"], projects: ["azenk-graduation"], vehicles: ["fleetpro"], appointments: ["clinicflow"], slides: ["azenk-presentations"] },
     // activity → systems that usually fit
-    activitySystems: { company: ["azenk-hr"], callcenter: ["azenk-callcenter"], education: ["azenk-graduation"], clinic: ["clinicflow"], fleet: ["fleetpro"], student: ["azenk-presentations"] },
+    activitySystems: { company: ["azenk-hr", "azenk-requests"], callcenter: ["azenk-callcenter"], education: ["azenk-graduation"], clinic: ["clinicflow"], fleet: ["fleetpro"], student: ["azenk-presentations"] },
     // problem → services
     problemServices: { website: ["web", "ecommerce"], manual: ["automation", "transformation"], integration: ["integration"], slides: ["presentations"], projects: ["graduation"], customers: ["callcenter"] },
   },

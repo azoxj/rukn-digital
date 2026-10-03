@@ -44,11 +44,11 @@ HEAD = """<!DOCTYPE html>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Readex+Pro:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="../style.css?v=20261003.3">
-  <script src="../config.js?v=20261003.3" defer></script>
-  <script src="../data.js?v=20261003.3" defer></script>
-  <script src="../i18n.js?v=20261003.3" defer></script>
-  <script src="../script.js?v=20261003.3" defer></script>
+  <link rel="stylesheet" href="../style.css?v=20261003.4">
+  <script src="../config.js?v=20261003.4" defer></script>
+  <script src="../data.js?v=20261003.4" defer></script>
+  <script src="../i18n.js?v=20261003.4" defer></script>
+  <script src="../script.js?v=20261003.4" defer></script>
 </head>
 <body data-page="{page}" data-root="../">
   <a class="skip-link" href="#main" data-i18n="skip">تخطَّ إلى المحتوى</a>
@@ -105,8 +105,8 @@ STEPS = [
 steps_html = "\n".join(f'          <li class="reveal"><span class="process__n">{i+1:02d}</span><h3 data-i18n="step.{i+1}.t">{t}</h3><p data-i18n="step.{i+1}.d">{d}</p></li>' for i, (t, d) in enumerate(STEPS))
 
 PAGES = [
-  dict(page="products", crumb="الأنظمة", title="أنظمة AZENK | AZENK HR وCall Center وGraduation وPresentations",
-       desc="أنظمة AZENK المبرمجة والمختبرة: AZENK HR للموارد البشرية، AZENK Call Center لخدمة العملاء، AZENK Graduation لمشاريع التخرج، AZENK Presentations لعروض PowerPoint، وFleetPro وClinicFlow. السعر عند الطلب.",
+  dict(page="products", crumb="الأنظمة", title="أنظمة AZENK | HR وCall Center وRequests وGraduation وPresentations",
+       desc="أنظمة AZENK المبرمجة والمختبرة: AZENK HR للموارد البشرية، AZENK Call Center لخدمة العملاء، AZENK Requests للطلبات الداخلية والموافقات، AZENK Graduation لمشاريع التخرج، AZENK Presentations لعروض PowerPoint، وFleetPro وClinicFlow. السعر عند الطلب.",
        eyebrow="أنظمة مبرمجة ومختبرة", h1="أنظمة AZENK", lead="كل نظام هنا مبرمج فعليًا ومختبر. لكل نظام حالة واضحة، ونوضح أين يعمل: في المتصفح أو على خادم بقاعدة بيانات.",
        body="""
     <section class="section">

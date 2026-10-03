@@ -9,7 +9,7 @@
 window.AZENK_EN = {
   /* Page titles (shown in the browser tab when English is active) */
   "title.home": "AZENK | Ready digital systems and custom technology solutions for business",
-  "title.products": "AZENK Systems | AZENK HR, Call Center, Graduation and Presentations",
+  "title.products": "AZENK Systems | HR, Call Center, Requests, Graduation and Presentations",
   "title.solutions": "Let AZENK find the right solution for you | AZENK",
   "title.build": "Build your system with AZENK | From idea to a working system",
   "title.services": "AZENK Services | Custom software, websites, stores, automation and integration",

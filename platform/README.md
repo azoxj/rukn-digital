@@ -1,11 +1,12 @@
 # AZENK platform — server products
 
-Two full-stack products built on one shared core:
+Three full-stack products built on one shared core:
 
 | Product | Roles | Default port |
 |---|---|---|
 | **AZENK Call Center** (`apps/callcenter`) | SUPER_ADMIN, ADMIN, SUPERVISOR, AGENT | 4100 |
 | **AZENK Graduation** (`apps/graduation`) | ADMIN, SUPERVISOR, STUDENT | 4200 |
+| **AZENK Requests** (`apps/requests`) | ADMIN, MANAGER, EMPLOYEE | 4300 |
 
 No third-party runtime dependencies: Node.js built-ins (`node:http`, `node:crypto`,
 `node:sqlite`) only. Requires **Node.js 22.13+**.
@@ -19,18 +20,19 @@ platform/
     common-routes.js users, organisations, notifications, audit log
     validate.js      request validation (Arabic field messages)
     security.js      scrypt hashing, tokens, rate limiter
+    files.js         validated uploads (allow-list + magic bytes), attachment downloads
     migrations/      core schema (organisations, users, sessions, notifications, audit_log)
     public/          ui.js + ui.css (API client, shell, router, forms, tables, charts)
   apps/<app>/        app.js (permissions + routes), migrations/, public/, seed.js, server.js
   scripts/           bootstrap, seed-demo, check
-  tests/             node:test API tests (53)
+  tests/             node:test API tests (68)
 ```
 
 ## Run locally
 
 ```bash
 cd platform
-npm test                                   # 53 API tests (in-memory DBs)
+npm test                                   # 68 API tests (in-memory DBs)
 
 # Try it with fictional demo data (refuses to touch a non-empty DB):
 DEMO_PASSWORD='Choose-a-pass-2026' npm run seed:demo -- --app callcenter
@@ -38,7 +40,19 @@ npm run callcenter                         # http://127.0.0.1:4100
 
 DEMO_PASSWORD='Choose-a-pass-2026' npm run seed:demo -- --app graduation
 npm run graduation                         # http://127.0.0.1:4200
+
+DEMO_PASSWORD='Choose-a-pass-2026' npm run seed:demo -- --app requests
+npm run requests                           # http://127.0.0.1:4300
 ```
+
+### AZENK Requests in short
+- Admins define **request types**: fields (text, long text, number, date, list, checkbox) and an ordered
+  **approval path** where each step is the requester's direct manager, any user with a role, or a named
+  user, plus a response time (SLA) per step. Four starter types can be installed with one click.
+- Requests keep a snapshot of their type, so editing a type never changes submitted requests.
+- Approvers approve, reject or return for changes (comment required for reject/return); the requester
+  edits and resubmits. Nobody can approve their own request (it is routed to another admin instead).
+- Managers are set per employee (with cycle protection) and used to route "direct manager" steps.
 
 Demo accounts use `example.com` e-mails (e.g. `admin@example.com`, `supervisor@example.com`,
 `agent1@example.com` / `student1@example.com`). Without `DEMO_PASSWORD` a random password is
@@ -82,7 +96,7 @@ or database files (`data/` is git-ignored).
 - Call Center: calls are **logged** by agents (with an in-app timer). There is no telephony/VoIP,
   call recording, WhatsApp, SMS, CRM or AI integration. The `calls.provider`, `provider_ref` and
   `recording_url` columns are reserved for a future integration and stay empty.
-- E-mail delivery is not implemented: notifications are in-app.
+- E-mail/SMS delivery is not implemented: notifications are in-app (all three products).
 - Hosting is not configured. These apps need a Node.js host with persistent disk (they cannot run
   on GitHub Pages). Put them behind HTTPS (reverse proxy) with `COOKIE_SECURE=1` and
   `TRUST_PROXY=1`, and back up the `data/` directory.

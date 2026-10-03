@@ -77,9 +77,10 @@ Nothing is pushed, merged or deployed without explicit approval.
 | AZENK Presentations with real .pptx export | Done | 27 UI checks + python-pptx file check |
 | AZENK Call Center (server, SQLite, RBAC, tenants) | MVP done | 33 API tests (+ core) + 23 UI E2E |
 | AZENK Graduation (server, uploads, reviews, rubric) | MVP done | 15 API tests + UI E2E |
+| AZENK Requests (server: request types, multi-step approvals, attachments) | MVP done | 15 API tests + UI E2E |
 | Product gap analysis | Done | `docs/PRODUCT-GAP-ANALYSIS.md` |
 
 Not done / needs your decision:
-- Hosting for Call Center and Graduation (they cannot run on GitHub Pages). Until then the site offers «اطلب Demo» for them, shown live on request.
+- Hosting for Call Center, Graduation and Requests (they cannot run on GitHub Pages). Until then the site offers «اطلب Demo» for them, shown live on request.
 - AZENK HR, FleetPro and ClinicFlow remain browser demos (labelled as such); server editions are planned in the gap analysis.
 - Nothing pushed, merged or deployed.

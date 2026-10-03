@@ -2,14 +2,13 @@
 // milestones, tasks, files, supervisor feedback and rubric evaluations.
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
-import { mkdirSync, writeFileSync, readFileSync, unlinkSync, existsSync } from "node:fs";
-import { createHash, randomBytes } from "node:crypto";
 import { created } from "../../core/http.js";
 import { HttpError, notFound, forbidden, conflict } from "../../core/errors.js";
 import { parse, schema, v } from "../../core/validate.js";
 import { paging, likeTerm, toCsv, sendCsv } from "../../core/services.js";
 import { tx, nowIso } from "../../core/db.js";
 import { localToday } from "../../core/time.js";
+import { createFileStore, MAX_FILE } from "../../core/files.js";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 
@@ -24,21 +23,6 @@ export const DEFAULT_MILESTONES = [
 ];
 export const DEFAULT_RUBRIC = [["فهم المشكلة والتحليل", 20], ["التصميم والمنهجية", 20], ["جودة التنفيذ", 30], ["التوثيق", 15], ["العرض والمناقشة", 15]];
 
-// Allowed uploads: extension → { mime, magic(buffer) }.
-const ZIP = (b) => b[0] === 0x50 && b[1] === 0x4b;
-const TYPES = {
-  pdf: { mime: "application/pdf", ok: (b) => b.subarray(0, 5).toString("latin1") === "%PDF-" },
-  png: { mime: "image/png", ok: (b) => b[0] === 0x89 && b.subarray(1, 4).toString("latin1") === "PNG" },
-  jpg: { mime: "image/jpeg", ok: (b) => b[0] === 0xff && b[1] === 0xd8 },
-  jpeg: { mime: "image/jpeg", ok: (b) => b[0] === 0xff && b[1] === 0xd8 },
-  docx: { mime: "application/vnd.openxmlformats-officedocument.wordprocessingml.document", ok: ZIP },
-  pptx: { mime: "application/vnd.openxmlformats-officedocument.presentationml.presentation", ok: ZIP },
-  xlsx: { mime: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", ok: ZIP },
-  zip: { mime: "application/zip", ok: ZIP },
-  txt: { mime: "text/plain", ok: (b) => !b.includes(0) },
-  md: { mime: "text/markdown", ok: (b) => !b.includes(0) },
-};
-const MAX_FILE = 15 * 1024 * 1024;
 
 export const graduationApp = {
   name: "graduation",
@@ -55,10 +39,8 @@ export const graduationApp = {
 function routes(router, { db, audit, notify, can, dataDir }) {
   const org = (ctx) => ctx.user.org_id;
   const me = (ctx) => ctx.user.id;
-  const filesRoot = () => {
-    if (!dataDir) throw new HttpError(500, "مجلد الملفات غير مهيأ");
-    return join(dataDir, "files");
-  };
+  const store = createFileStore(dataDir);
+
 
   /* ---------------- access ---------------- */
   const isMember = (pid, uid) => !!db.prepare("SELECT 1 FROM project_members WHERE project_id = ? AND user_id = ?").get(pid, uid);
@@ -386,26 +368,16 @@ function routes(router, { db, audit, notify, can, dataDir }) {
   /* ================= Files ================= */
   router.put("/api/projects/:id/files", { perm: "files.upload", raw: true, maxBytes: MAX_FILE }, (ctx) => {
     const { p } = projectOf(ctx, ctx.params.id);
-    const name = String(ctx.query.name || "").normalize("NFC").replace(/[\\/\u0000-\u001f<>:"|?*]+/g, "_").trim().slice(0, 150);
-    const ext = (name.match(/\.([a-z0-9]{1,5})$/i) || [])[1]?.toLowerCase();
-    if (!name || !ext || !TYPES[ext]) throw new HttpError(415, "نوع الملف غير مسموح. المسموح: PDF، Word، PowerPoint، Excel، ZIP، صور PNG/JPG، نص");
-    const buf = ctx.body;
-    if (!buf || !buf.length) throw new HttpError(422, "الملف فارغ");
-    if (!TYPES[ext].ok(buf)) throw new HttpError(415, "محتوى الملف لا يطابق امتداده");
     const milestoneId = ctx.query.milestone_id ? Number(ctx.query.milestone_id) : null;
     if (milestoneId && !db.prepare("SELECT 1 FROM milestones WHERE id = ? AND project_id = ?").get(milestoneId, p.id)) throw new HttpError(422, "بيانات غير صالحة", { milestone_id: "المرحلة لا تتبع هذا المشروع" });
-    const key = `${org(ctx)}/${randomBytes(16).toString("hex")}`;
-    const dir = join(filesRoot(), String(org(ctx)));
-    mkdirSync(dir, { recursive: true });
-    writeFileSync(join(filesRoot(), key), buf, { flag: "wx" });
-    const sha = createHash("sha256").update(buf).digest("hex");
+    const f = store.save(org(ctx), ctx.query.name, ctx.body);
     let id;
     try {
       id = db.prepare("INSERT INTO files (org_id, project_id, milestone_id, uploader_id, original_name, mime, size, sha256, storage_key) VALUES (?,?,?,?,?,?,?,?,?)")
-        .run(org(ctx), p.id, milestoneId, me(ctx), name, TYPES[ext].mime, buf.length, sha, key).lastInsertRowid;
-    } catch (e) { try { unlinkSync(join(filesRoot(), key)); } catch { /* ignore */ } throw e; }
+        .run(org(ctx), p.id, milestoneId, me(ctx), f.name, f.mime, f.size, f.sha256, f.key).lastInsertRowid;
+    } catch (e) { store.remove(f.key); throw e; }
     db.prepare("UPDATE projects SET updated_at = ? WHERE id = ?").run(nowIso(), p.id);
-    audit.log(ctx, "file.upload", "file", id, { project: p.id, name, size: buf.length });
+    audit.log(ctx, "file.upload", "file", id, { project: p.id, name: f.name, size: f.size });
     return created({ file: db.prepare("SELECT id, original_name, mime, size, milestone_id, created_at FROM files WHERE id = ?").get(id) });
   });
 
@@ -417,17 +389,7 @@ function routes(router, { db, audit, notify, can, dataDir }) {
 
   router.get("/api/files/:id/download", (ctx) => {
     const { f } = fileOf(ctx, ctx.params.id);
-    const path = join(filesRoot(), f.storage_key);
-    if (!existsSync(path)) throw notFound("محتوى الملف");
-    const data = readFileSync(path);
-    const ascii = f.original_name.replace(/[^\x20-\x7e]/g, "_").replace(/"/g, "");
-    ctx.res.writeHead(200, {
-      "Content-Type": f.mime,
-      "Content-Length": data.length,
-      "Content-Disposition": `attachment; filename="${ascii}"; filename*=UTF-8''${encodeURIComponent(f.original_name)}`,
-      "Cache-Control": "private, no-store",
-    });
-    ctx.res.end(data);
+    store.send(ctx.res, f);
     audit.log(ctx, "file.download", "file", f.id);
   });
 
@@ -435,7 +397,7 @@ function routes(router, { db, audit, notify, can, dataDir }) {
     const { f, access } = fileOf(ctx, ctx.params.id);
     if (!staffRole(access) && f.uploader_id !== me(ctx)) throw forbidden();
     db.prepare("DELETE FROM files WHERE id = ?").run(f.id);
-    try { unlinkSync(join(filesRoot(), f.storage_key)); } catch { /* already gone */ }
+    store.remove(f.storage_key);
     audit.log(ctx, "file.delete", "file", f.id, { name: f.original_name });
     return { ok: true };
   });

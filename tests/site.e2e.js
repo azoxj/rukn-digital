@@ -41,14 +41,14 @@ const ok = (c, m) => { if (c) pass++; else { fail++; console.log("FAIL " + m); }
   /* ---------- systems ---------- */
   await p.goto(BASE + "products/");
   const cards = await p.$$("#main .product");
-  ok(cards.length === 6, "6 systems");
+  ok(cards.length === 7, "7 systems");
   const names = await p.$$eval("#main .product h3", (x) => x.map((e) => e.textContent.trim()));
-  ok(JSON.stringify(names) === JSON.stringify(["AZENK HR", "AZENK Call Center", "AZENK Graduation", "AZENK Presentations", "FleetPro", "ClinicFlow"]), "system names/order " + names);
-  ok((await p.$$("#main .product__problem")).length === 6, "problem statement on every card");
+  ok(JSON.stringify(names) === JSON.stringify(["AZENK HR", "AZENK Call Center", "AZENK Requests", "AZENK Graduation", "AZENK Presentations", "FleetPro", "ClinicFlow"]), "system names/order " + names);
+  ok((await p.$$("#main .product__problem")).length === 7, "problem statement on every card");
   await p.evaluate(() => document.querySelectorAll("img").forEach((i) => (i.loading = "eager")));
   await p.waitForTimeout(800);
   const imgs = await p.$$eval("#main .product img", (x) => x.map((i) => i.complete && i.naturalWidth > 0));
-  ok(imgs.length === 6 && imgs.every(Boolean), "real screenshots load");
+  ok(imgs.length === 7 && imgs.every(Boolean), "real screenshots load");
   const statuses = await p.$$eval("#main .pstatus", (x) => x.map((e) => e.textContent.trim()));
   ok(statuses.every((s) => ["جاهز", "Demo متاح", "قيد التطوير"].includes(s)), "allowed statuses " + statuses);
   ok(!(await p.textContent("#main")).match(/\d[\d,]*\s*(ريال|SAR|ر\.س)/), "no numeric prices on systems page");
@@ -56,7 +56,7 @@ const ok = (c, m) => { if (c) pass++; else { fail++; console.log("FAIL " + m); }
   ok(live.length === 4, "4 live demos " + live);
   for (const h of live) { const r = await p.request.get(new URL(h, BASE + "products/").href); ok(r.status() === 200, `demo ${h} reachable`); }
   const w = await waTexts();
-  for (const n of ["AZENK Call Center", "AZENK Graduation"]) ok(w.some((t) => t.startsWith(`السلام عليكم، أرغب في طلب Demo لنظام ${n}.`)), `demo request for ${n}`);
+  for (const n of ["AZENK Call Center", "AZENK Requests", "AZENK Graduation"]) ok(w.some((t) => t.startsWith(`السلام عليكم، أرغب في طلب Demo لنظام ${n}.`)), `demo request for ${n}`);
   ok(w.some((t) => t === "السلام عليكم، أرغب في عرض سعر لنظام AZENK HR.\n\nالاسم:\nالنشاط:\nعدد المستخدمين:\nملاحظات:"), "structured quote message");
   await p.goto(BASE + "products/#azenk-hr");
   await p.waitForSelector(".pmodal.is-open");
@@ -98,6 +98,11 @@ const ok = (c, m) => { if (c) pass++; else { fail++; console.log("FAIL " + m); }
   await p.click("[data-finder] button[type=submit]");
   await p.waitForSelector(".result");
   ok((await p.textContent(".result h2")).includes("تطوير أنظمتك الحالية"), "finder improve path");
+  await p.click("[data-finder] button[type=reset]");
+  await pick("activity", "company"); await pick("size", "medium"); await pick("users", "21-100"); await pick("problems", "requests"); await pick("current", "none"); await pick("need", "ready");
+  await p.click("[data-finder] button[type=submit]");
+  await p.waitForSelector(".result");
+  ok((await p.textContent(".result__systems")).includes("AZENK Requests"), "finder suggests Requests for approvals");
 
   /* ---------- build form ---------- */
   await p.goto(BASE + "build/?type=graduation");

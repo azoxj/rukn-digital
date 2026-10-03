@@ -18,7 +18,8 @@ export function args() {
 export async function loadApp(name) {
   if (name === "callcenter") return (await import("../apps/callcenter/app.js")).callcenterApp;
   if (name === "graduation") return (await import("../apps/graduation/app.js")).graduationApp;
-  throw new Error(`Unknown app "${name}". Use --app callcenter|graduation`);
+  if (name === "requests") return (await import("../apps/requests/app.js")).requestsApp;
+  throw new Error(`Unknown app "${name}". Use --app callcenter|graduation|requests`);
 }
 
 export const dbFileFor = (name) => process.env.DB_FILE || join(ROOT, "data", `${name}.db`);
